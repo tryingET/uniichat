@@ -1,6 +1,5 @@
 import { Agent } from "./Agent.ts";
 import { ClaudeSub } from "./ClaudeSub.ts";
-import { stream_lines } from "./Clip.ts";
 import { Limit } from "./Limit.ts";
 import { Machine } from "./Machine.ts";
 import { OpenAI } from "./OpenAI.ts";
@@ -358,12 +357,6 @@ export namespace AskAI {
       }
     };
     return { begun, end };
-  }
-
-  export async function* lines(stream: ReadableStream<Uint8Array>) {
-    for await (const lines of stream_lines(stream)) {
-      yield* lines.map((line) => line.trim()).filter((line) => line !== "");
-    }
   }
 
   export function show(content: unknown): string {

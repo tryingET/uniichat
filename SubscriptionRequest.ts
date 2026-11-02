@@ -1,3 +1,6 @@
+// Native request dialects. References: Pi api/openai-{responses,completions}.ts,
+// api/anthropic-messages.ts; Cells nodecode-{xai-oauth,muse-code}/provider.lisp.
+// No runtime imports of Agent/AskAI: those load user configuration and services.
 import type { Ask, Img } from "./AskAI.ts";
 import type { Item, Tool } from "./Agent.ts";
 import { SubscriptionModels, SUBSCRIPTION_VENDORS, type SubscriptionModel, type SubscriptionVendor } from "./SubscriptionModels.ts";
@@ -21,11 +24,14 @@ export function vendorOf(model: SubscriptionModel): SubscriptionVendor {
   throw new Error("unsupported subscription model/protocol/endpoint combination");
 }
 
+const COPILOT = ["api.githubcopilot.com", "api.individual.githubcopilot.com", "api.business.githubcopilot.com", "api.enterprise.githubcopilot.com"];
 export function destination(model: SubscriptionModel, vendor: SubscriptionVendor, base: string): string {
   // Compare raw URLs, not just normalized hosts (reject userinfo, ports, query,
   // fragments, encoded paths and dot-segments before any credential can leave).
   const clean = base.replace(/\/$/, "");
-  const allowed = vendor === "opencode-go" ? ["https://opencode.ai/zen/go", "https://opencode.ai/zen/go/v1"] : ["https://api.x.ai/v1"];
+  const allowed = vendor === "copilot-sub" ? COPILOT.map((h) => "https://" + h)
+    : vendor === "opencode-go" ? ["https://opencode.ai/zen/go", "https://opencode.ai/zen/go/v1"]
+    : ["https://api.x.ai/v1"];
   if (!allowed.includes(clean)) throw new Error("unsafe subscription inference endpoint");
   const root = vendor === "opencode-go" ? "https://opencode.ai/zen/go" + (model.api === "anthropic-messages" ? "" : "/v1") : clean;
   // Anthropic SDK resources/messages/messages.ts appends /v1/messages to
@@ -51,7 +57,7 @@ function image(img: Img, api: SubscriptionModel["api"]): Obj {
 function content(texts: string[], imgs: Img[], api: SubscriptionModel["api"]): Obj[] {
   return [...texts.filter((t) => t !== "").map((t) => ({ type: api === "openai-responses" ? "input_text" : "text", text: t })), ...imgs.map((img) => image(img, api))];
 }
-function hasImages(items: Item[]): boolean {
+export function hasImages(items: Item[]): boolean {
   return items.some((i) => i.$ === "User" ? i.imgs.length > 0 : i.$ === "Back" && i.backs.some((b) => (b.out.imgs?.length ?? 0) > 0));
 }
 

@@ -6,11 +6,31 @@ export type Body = Record<string, unknown>;
 export class Denied extends Error {
   constructor() { super("Subscription permission missing, removed, or expired; log in again"); }
 }
+const COPILOT_HOSTS = new Set([
+  "api.githubcopilot.com", "api.individual.githubcopilot.com",
+  "api.business.githubcopilot.com", "api.enterprise.githubcopilot.com",
+]);
+export function copilotBase(raw: unknown): string {
+  if (typeof raw !== "string") throw new Error("Missing Copilot inference endpoint");
+  let url: URL;
+  try { url = new URL(raw); } catch { throw new Error("Untrusted Copilot inference endpoint"); }
+  if (url.protocol !== "https:" || url.username || url.password || url.port ||
+      url.search || url.hash || !["", "/"].includes(url.pathname) || !COPILOT_HOSTS.has(url.hostname)) {
+    throw new Error("Untrusted Copilot inference endpoint");
+  }
+  return url.origin;
+}
 const AUTH_URLS = new Set([
   "https://auth.x.ai/oauth2/device/code", "https://auth.x.ai/oauth2/token",
+  "https://github.com/login/device/code",
+  "https://github.com/login/oauth/access_token", "https://api.github.com/copilot_internal/v2/token",
 ]);
-async function request(url: string, init: RequestInit, signal?: AbortSignal): Promise<{ body: Body; ok: boolean; status: number }> {
-  if (!AUTH_URLS.has(url)) throw new Error("Untrusted subscription auth URL");
+function allowed(url: string): boolean {
+  if (AUTH_URLS.has(url)) return true;
+  try { return url === copilotBase(new URL(url).origin) + "/models"; } catch { return false; }
+}
+export async function request(url: string, init: RequestInit, signal?: AbortSignal): Promise<{ body: Body; ok: boolean; status: number }> {
+  if (!allowed(url)) throw new Error("Untrusted subscription auth URL");
   const timeout = AbortSignal.timeout(30_000);
   const bounded = signal ? AbortSignal.any([signal, timeout]) : timeout;
   try {
@@ -59,12 +79,12 @@ export type LoginOptions = {
   show?: (url: string, code: string) => void; wait?: (ms: number, signal?: AbortSignal) => Promise<void>;
   signal?: AbortSignal; key?: string;
 };
-export async function device(_vendor: SubscriptionVendor, url: string, tokenUrl: string, fields: Record<string, string>, options: LoginOptions): Promise<Body> {
+export async function device(vendor: SubscriptionVendor, url: string, tokenUrl: string, fields: Record<string, string>, options: LoginOptions): Promise<Body> {
   const started = success(await form(url, fields, options.signal));
   const deviceCode = secret(started.device_code);
   const userCode = started.user_code;
   if (typeof userCode !== "string" || !/^[A-Za-z0-9-]{1,64}$/.test(userCode)) throw new Error("Invalid device user code");
-  const hosts = ["auth.x.ai", "accounts.x.ai", "x.ai"];
+  const hosts = vendor === "xai-sub" ? ["auth.x.ai", "accounts.x.ai", "x.ai"] : ["github.com"];
   let verification: URL;
   try { verification = new URL(String(started.verification_uri)); } catch { throw new Error("Untrusted device verification URL"); }
   if (verification.protocol !== "https:" || verification.username || verification.password || verification.port ||
@@ -72,7 +92,7 @@ export async function device(_vendor: SubscriptionVendor, url: string, tokenUrl:
   let interval = lifetime(started.interval === 0 ? undefined : started.interval, 5, 60) * 1000;
   // xAI may issue a code valid longer than our local 15-minute wait budget.
   // Accept that provider lifetime, but never extend our polling deadline.
-  const duration = lifetime(started.expires_in, 900, Number.MAX_SAFE_INTEGER);
+  const duration = lifetime(started.expires_in, 900, vendor === "xai-sub" ? Number.MAX_SAFE_INTEGER : 900);
   const end = Date.now() + Math.min(duration, 900) * 1000;
   options.show?.(verification.href, userCode);
   const wait = options.wait ?? (async (ms, signal) => { await delay(ms, undefined, { signal }); });

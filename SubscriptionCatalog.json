@@ -2,7 +2,7 @@
   "provenance": {
     "pi": "b556cfe5b0300a91f39c7bc5369a65a25fb7fcd5",
     "cells": "f5dcf452bcd08b4d877dbc59e60d0bfc43731d08",
-    "note": "Public xAI and OpenCode Go catalog declarations only; no pricing or entitlement claim. Effort rosters follow pinned Pi getSupportedThinkingLevels restricted to low/medium/high/xhigh/max."
+    "note": "Public xAI, OpenCode Go and Copilot capability declarations only; no pricing or entitlement claim. Effort rosters follow pinned Pi getSupportedThinkingLevels restricted to low/medium/high/xhigh/max."
   },
   "models": {
     "xai-sub": [
@@ -750,6 +750,1159 @@
         },
         "compat": {
           "sessionAffinityFormat": "openai-nosession"
+        }
+      }
+    ],
+    "copilot-sub": [
+      {
+        "label": "claude-haiku-4.5",
+        "id": "claude-haiku-4.5",
+        "speeds": [
+          "slow"
+        ],
+        "window": 200000,
+        "output": 64000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsEagerToolInputStreaming": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-opus-4.5",
+        "id": "claude-opus-4.5",
+        "speeds": [
+          "slow"
+        ],
+        "window": 200000,
+        "output": 32000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-opus-4.6",
+        "id": "claude-opus-4.6",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 32000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "max": "max"
+        },
+        "compat": {
+          "forceAdaptiveThinking": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-opus-4.7",
+        "id": "claude-opus-4.7",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 32000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "xhigh": "xhigh",
+          "max": "max",
+          "minimal": "low"
+        },
+        "compat": {
+          "forceAdaptiveThinking": true,
+          "supportsTemperature": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-opus-4.8",
+        "id": "claude-opus-4.8",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 64000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "xhigh": "xhigh",
+          "max": "max",
+          "minimal": "low"
+        },
+        "compat": {
+          "forceAdaptiveThinking": true,
+          "supportsTemperature": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-opus-5",
+        "id": "claude-opus-5",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 64000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "xhigh": "xhigh",
+          "max": "max",
+          "minimal": "low"
+        },
+        "compat": {
+          "forceAdaptiveThinking": true,
+          "supportsTemperature": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-sonnet-4",
+        "id": "claude-sonnet-4",
+        "speeds": [
+          "slow"
+        ],
+        "window": 216000,
+        "output": 16000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsEagerToolInputStreaming": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-sonnet-4.5",
+        "id": "claude-sonnet-4.5",
+        "speeds": [
+          "slow"
+        ],
+        "window": 200000,
+        "output": 32000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsEagerToolInputStreaming": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-sonnet-4.6",
+        "id": "claude-sonnet-4.6",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 32000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "max": "max",
+          "minimal": "low"
+        },
+        "compat": {
+          "forceAdaptiveThinking": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-sonnet-5",
+        "id": "claude-sonnet-5",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 128000,
+        "api": "anthropic-messages",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "xhigh": "xhigh",
+          "max": "max"
+        },
+        "compat": {
+          "forceAdaptiveThinking": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "claude-fable-5",
+        "id": "claude-fable-5",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 128000,
+        "api": "openai-completions",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "xhigh": "xhigh",
+          "max": "max"
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "supportsReasoningEffort": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gemini-3.1-pro-preview",
+        "id": "gemini-3.1-pro-preview",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 64000,
+        "api": "openai-completions",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "supportsReasoningEffort": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gemini-3.5-flash",
+        "id": "gemini-3.5-flash",
+        "speeds": [
+          "slow"
+        ],
+        "window": 200000,
+        "output": 64000,
+        "api": "openai-completions",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "supportsReasoningEffort": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gemini-3.6-flash",
+        "id": "gemini-3.6-flash",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 64000,
+        "api": "openai-completions",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "supportsReasoningEffort": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gemini-3.7-flash",
+        "id": "gemini-3.7-flash",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 64000,
+        "api": "openai-completions",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "supportsReasoningEffort": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-4.1",
+        "id": "gpt-4.1",
+        "speeds": [
+          "slow"
+        ],
+        "window": 128000,
+        "output": 16384,
+        "api": "openai-completions",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": false,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "supportsReasoningEffort": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "kimi-k2.7-code",
+        "id": "kimi-k2.7-code",
+        "speeds": [
+          "slow"
+        ],
+        "window": 256000,
+        "output": 32000,
+        "api": "openai-completions",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "supportsReasoningEffort": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "kimi-k3",
+        "id": "kimi-k3",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1048576,
+        "output": 131072,
+        "api": "openai-completions",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "medium"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "supportsReasoningEffort": false
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5-mini",
+        "id": "gpt-5-mini",
+        "speeds": [
+          "slow"
+        ],
+        "window": 264000,
+        "output": 64000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": null,
+          "max": null
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.2",
+        "id": "gpt-5.2",
+        "speeds": [
+          "slow"
+        ],
+        "window": 400000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "xhigh": "xhigh"
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.2-codex",
+        "id": "gpt-5.2-codex",
+        "speeds": [
+          "slow"
+        ],
+        "window": 400000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "xhigh": "xhigh"
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.3-codex",
+        "id": "gpt-5.3-codex",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.4",
+        "id": "gpt-5.4",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.4-mini",
+        "id": "gpt-5.4-mini",
+        "speeds": [
+          "slow"
+        ],
+        "window": 400000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.4-nano",
+        "id": "gpt-5.4-nano",
+        "speeds": [
+          "slow"
+        ],
+        "window": 400000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "xhigh": "xhigh"
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.5",
+        "id": "gpt-5.5",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1000000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.6-luna",
+        "id": "gpt-5.6-luna",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1050000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": "max"
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.6-sol",
+        "id": "gpt-5.6-sol",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1050000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": "max"
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "gpt-5.6-terra",
+        "id": "gpt-5.6-terra",
+        "speeds": [
+          "slow"
+        ],
+        "window": 1050000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "low",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": "max"
+        },
+        "compat": {
+          "supportsOpenAIGrammarTools": true
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "grok-4.5",
+        "id": "grok-4.5",
+        "speeds": [
+          "slow"
+        ],
+        "window": 500000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": null,
+          "max": null
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "grok-4.6",
+        "id": "grok-4.6",
+        "speeds": [
+          "slow"
+        ],
+        "window": 500000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "mai-code-1-flash-picker",
+        "id": "mai-code-1-flash-picker",
+        "speeds": [
+          "slow"
+        ],
+        "window": 256000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": null,
+          "max": null
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
+        }
+      },
+      {
+        "label": "mai-code-1.1-flash",
+        "id": "mai-code-1.1-flash",
+        "speeds": [
+          "slow"
+        ],
+        "window": 256000,
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://api.individual.githubcopilot.com",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "efforts": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": null,
+          "max": null
+        },
+        "headers": {
+          "User-Agent": "GitHubCopilotChat/0.35.0",
+          "Editor-Version": "vscode/1.107.0",
+          "Editor-Plugin-Version": "copilot-chat/0.35.0",
+          "Copilot-Integration-Id": "vscode-chat"
         }
       }
     ]

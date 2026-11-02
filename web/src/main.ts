@@ -1223,7 +1223,7 @@ function settings_draw(page: Page): void {
       const four = value?.parentElement?.querySelector<HTMLElement>(".four");
       if (value && four) {
         const focus = (document.activeElement as HTMLSelectElement | null)?.name;
-        four.innerHTML = Html.picks_html(key, vendors, listed("models"), value.value, key === "agents" ? "The chat's pick" : null, names());
+        four.innerHTML = Html.picks_html(key, vendors, listed("models"), value.value, key === "agents" ? "The chat's pick" : null, names(), page.available);
         four.querySelector<HTMLSelectElement>(`select[name="${focus}"]`)?.focus();
       }
     }
@@ -1248,7 +1248,7 @@ function settings_draw(page: Page): void {
     must(el.querySelector(".err"), "the setting's err").textContent = "";
     const value = el.querySelector<HTMLInputElement>("input[type=hidden]");
     if (value !== null) {
-      value.value = Html.pick_mend([...el.querySelectorAll("select")].map((s) => s.value), listed("models"), names());
+      value.value = Html.pick_mend([...el.querySelectorAll("select")].map((s) => s.value), listed("models"), names(), page.available);
     }
     picks();
     if (el.dataset.key === "vendors" || el.dataset.key === "models") {
@@ -1277,7 +1277,7 @@ function settings_draw(page: Page): void {
   };
   const profs_draw = (focus?: string) => {
     if (box !== null) {
-      box.innerHTML = Html.profiles_html(profs, Html.offered(listed("vendors"), listed("models")));
+      box.innerHTML = Html.profiles_html(profs, Html.offered(listed("vendors"), listed("models"), page.available));
       (focus === undefined ? null : box.querySelector<HTMLElement>(focus) ?? box.querySelector<HTMLElement>(".pnew"))?.focus();
     }
   };

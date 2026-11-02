@@ -1,7 +1,7 @@
 import type { Again, Kind, Parked, Vendor } from "./AskAI.ts";
 import * as Call from "./Call.ts";
 import * as Md from "./Md.ts";
-import { LABELS, type Fall, type Move, Pick } from "./Pick.ts";
+import { LABELS, type Available, type Fall, type Move, Pick } from "./Pick.ts";
 import { GLYPH, WHO } from "./Theme.ts";
 import type { Timer } from "./Timer.ts";
 import type { Job } from "./Machine.ts";
@@ -59,6 +59,7 @@ type Offered = {
   vendors   : Vendor[];
   models    : string[];
   profiles? : Record<string, Fall[]>;
+  available?: Available;
 };
 
 type ChatSet = {

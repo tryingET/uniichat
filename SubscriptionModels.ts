@@ -2,14 +2,14 @@
 // Sources and generation provenance are recorded in SubscriptionCatalog.json.
 import catalog from "./SubscriptionCatalog.json";
 
-export const SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go"] as const;
+export const SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go", "copilot-sub"] as const;
 export type SubscriptionVendor = (typeof SUBSCRIPTION_VENDORS)[number];
 export type SubscriptionApi = "openai-responses" | "openai-completions" | "anthropic-messages";
 export type SubscriptionModel = {
   label: string; id: string; speeds: string[]; window: number; output: number;
   api: SubscriptionApi; baseUrl: string; reasoning: boolean; input: string[];
   efforts: string[]; thinkingLevelMap?: Record<string, string | number | null>;
-  compat?: Record<string, unknown>;
+  compat?: Record<string, unknown>; headers?: Record<string, string>;
 };
 
 export namespace SubscriptionModels {

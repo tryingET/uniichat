@@ -1,7 +1,7 @@
 import type { Vendor } from "../../AskAI.ts";
 import * as Call from "../../Call.ts";
 import * as Md from "../../Md.ts";
-import { LABELS, Pick, VENDORS } from "../../Pick.ts";
+import { LABELS, Pick, VENDORS, type Available } from "../../Pick.ts";
 import type { Key, Page, Row } from "../../Settings.ts";
 import * as Theme from "../../Theme.ts";
 import * as Timer from "../../Timer.ts";
@@ -208,7 +208,7 @@ export function settings_html(page: Page): string {
   const rows = new Map(page.settings.filter((r) => r.web && r.from !== "env").map((r) => [r.key, r]));
   const group = ([title, keys]: [string, string[]]) => {
     const shown = keys.flatMap((k) => rows.get(k) ?? []);
-    return shown.length === 0 ? "" : section_html(title, shown.map(setting_html).join(""));
+    return shown.length === 0 ? "" : section_html(title, shown.map((r) => setting_html(r, page.available)).join(""));
   };
   const shown = page.keys.filter((k) => k.from !== "env");
   const keys = shown.length === 0 ? "" : section_html("Keys", `<p class="sub">Kept in keys.json in the server's folder, readable by the server's user only, and never shown again, only their last characters.</p>` + shown.map(key_html).join(""));
@@ -220,8 +220,8 @@ export function settings_html(page: Page): string {
   return head + error + none + `<form class="settings" autocomplete="off">` + group(GROUPS[0]) + profiles + keys + group(GROUPS[1]) + save + `</form>`;
 }
 
-export function offered(vendors: string[], models: string[]): string[] {
-  return Pick.models(VENDORS.filter((v) => vendors.includes(v)), models).map(([v, m]) => v + ":" + m.label);
+export function offered(vendors: string[], models: string[], available?: Available): string[] {
+  return Pick.models(VENDORS.filter((v) => vendors.includes(v)), models, available).map(([v, m]) => v + ":" + m.label);
 }
 
 export function profiles_html(profiles: Array<[string, string[]]>, offered: string[]): string {
@@ -240,20 +240,20 @@ export function profiles_html(profiles: Array<[string, string[]]>, offered: stri
   return profiles.map(one).join("") + `<button type="button" class="chip pnew">Add profile</button>`;
 }
 
-function setting_html(r: Row): string {
+function setting_html(r: Row, available?: Available): string {
   const [name, about] = SETTING[r.key] ?? [r.key, ""];
   const id = "set-" + r.key + (PICKS.includes(r.key) ? "-vendor" : "");
   const label = `<label for="${id}">${esc(name)}<small>${esc(about)} <code>${esc(r.key)}</code></small></label>`;
-  return `<div class="set" data-key="${esc(r.key)}">${label}<div class="field">${control_html(r)}</div>${from_html(r)}<p class="err"></p></div>`;
+  return `<div class="set" data-key="${esc(r.key)}">${label}<div class="field">${control_html(r, available)}</div>${from_html(r)}<p class="err"></p></div>`;
 }
 
-function control_html(r: Row): string {
+function control_html(r: Row, available?: Available): string {
   switch (r.key) {
     case "vendors": {
       return checks_html("vendors", VENDORS, list(r.value), () => "") + `<p class="warn"></p>`;
     }
     case "models": {
-      return checks_html("models", LABELS, list(r.value), (x) => Pick.models(VENDORS, [x]).map(([vendor]) => vendor).join(" "));
+      return checks_html("models", LABELS, list(r.value), (x) => Pick.models(VENDORS, [x], available).map(([vendor]) => vendor).join(" "));
     }
     case "pick":
     case "compactor":
@@ -301,11 +301,11 @@ function key_html(k: Key): string {
   return `<div class="set key" data-key="key.${esc(k.name)}">${label}<div class="field">${field}</div><p class="from">${from}${reset}</p><p class="err"></p></div>`;
 }
 
-export function picks_html(key: string, vendors: string[], models: string[], value: string, none: string | null, profiles: string[] = []): string {
+export function picks_html(key: string, vendors: string[], models: string[], value: string, none: string | null, profiles: string[] = [], available?: Available): string {
   const [vendor = "", model = "", effort = "", speed = ""] = value === "" ? [] : value.split(":");
   const known = (VENDORS as string[]).includes(vendor);
   const offered = (VENDORS as string[]).filter((v) => vendors.includes(v));
-  const labels = known ? Pick.models([vendor as Vendor], models).map(([, m]) => m.label) : [];
+  const labels = known ? Pick.models([vendor as Vendor], models, available).map(([, m]) => m.label) : [];
   const speeds = known ? Pick.model(vendor as Vendor, model)?.speeds ?? [] : [];
   const select = (part: string, name: string, all: string[], on: string, first: string | null) => {
     const opts: Array<[string, string]> = [...(first === null ? [] : [["", first] as [string, string]]), ...(all.includes(on) || (on === "" && first !== null) ? [] : [[on, on + " (not offered)"] as [string, string]]), ...all.map((x): [string, string] => [x, x])];
@@ -316,7 +316,7 @@ export function picks_html(key: string, vendors: string[], models: string[], val
   return vendor === "" || profiles.includes(vendor) ? head : head + select("model", "Model", labels, model, null) + select("effort", "Effort", Pick.efforts(known ? Pick.model(vendor as Vendor, model) : undefined), effort, null) + select("speed", "Speed", speeds, speed, null);
 }
 
-export function pick_mend(parts: string[], models: string[], profiles: string[] = []): string {
+export function pick_mend(parts: string[], models: string[], profiles: string[] = [], available?: Available): string {
   const [vendor = "", model = "", effort = "", speed = ""] = parts;
   if (profiles.includes(vendor)) {
     return vendor;
@@ -324,7 +324,7 @@ export function pick_mend(parts: string[], models: string[], profiles: string[] 
   if (!(VENDORS as string[]).includes(vendor)) {
     return vendor === "" ? "" : parts.join(":");
   }
-  const offered = Pick.models([vendor as Vendor], models).map(([, m]) => m);
+  const offered = Pick.models([vendor as Vendor], models, available).map(([, m]) => m);
   const m = offered.find((m) => m.label === model) ?? offered[0];
   if (m === undefined) {
     return parts.join(":");

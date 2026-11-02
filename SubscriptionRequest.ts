@@ -21,26 +21,35 @@ export function vendorOf(model: SubscriptionModel): SubscriptionVendor {
   throw new Error("unsupported subscription model/protocol/endpoint combination");
 }
 
-export function destination(_model: SubscriptionModel, _vendor: SubscriptionVendor, base: string): string {
+export function destination(model: SubscriptionModel, vendor: SubscriptionVendor, base: string): string {
+  // Compare raw URLs, not just normalized hosts (reject userinfo, ports, query,
+  // fragments, encoded paths and dot-segments before any credential can leave).
   const clean = base.replace(/\/$/, "");
-  if (clean !== "https://api.x.ai/v1") throw new Error("unsafe subscription inference endpoint");
-  return clean + "/responses";
+  const allowed = vendor === "opencode-go" ? ["https://opencode.ai/zen/go", "https://opencode.ai/zen/go/v1"] : ["https://api.x.ai/v1"];
+  if (!allowed.includes(clean)) throw new Error("unsafe subscription inference endpoint");
+  const root = vendor === "opencode-go" ? "https://opencode.ai/zen/go" + (model.api === "anthropic-messages" ? "" : "/v1") : clean;
+  // Anthropic SDK resources/messages/messages.ts appends /v1/messages to
+  // baseURL; unlike the OpenAI lanes, these catalog bases do not include /v1.
+  return root + (model.api === "openai-responses" ? "/responses" : model.api === "openai-completions" ? "/chat/completions" : "/v1/messages");
 }
 
-function effort(model: SubscriptionModel, ask: Ask): string | undefined {
+function effort(model: SubscriptionModel, ask: Ask): string | number | undefined {
   if (!model.efforts.includes(ask.effort)) throw new Error("unsupported subscription reasoning effort");
   if (!model.reasoning) return undefined;
-  return ask.effort;
+  const mapped = model.thinkingLevelMap?.[ask.effort];
+  return mapped === null ? undefined : mapped ?? ask.effort;
 }
 
-function image(img: Img): Obj {
+function image(img: Img, api: SubscriptionModel["api"]): Obj {
   if (!["image/png", "image/jpeg", "image/gif", "image/webp"].includes(img.type) || !/^[A-Za-z0-9+/]+={0,2}$/.test(img.data)) {
     throw new Error("unsupported subscription image encoding");
   }
-  return { type: "input_image", image_url: "data:" + img.type + ";base64," + img.data };
+  return api === "anthropic-messages" ? { type: "image", source: { type: "base64", media_type: img.type, data: img.data } }
+    : api === "openai-responses" ? { type: "input_image", image_url: "data:" + img.type + ";base64," + img.data }
+    : { type: "image_url", image_url: { url: "data:" + img.type + ";base64," + img.data } };
 }
-function content(texts: string[], imgs: Img[]): Obj[] {
-  return [...texts.filter((t) => t !== "").map((t) => ({ type: "input_text", text: t })), ...imgs.map(image)];
+function content(texts: string[], imgs: Img[], api: SubscriptionModel["api"]): Obj[] {
+  return [...texts.filter((t) => t !== "").map((t) => ({ type: api === "openai-responses" ? "input_text" : "text", text: t })), ...imgs.map((img) => image(img, api))];
 }
 function hasImages(items: Item[]): boolean {
   return items.some((i) => i.$ === "User" ? i.imgs.length > 0 : i.$ === "Back" && i.backs.some((b) => (b.out.imgs?.length ?? 0) > 0));
@@ -48,11 +57,56 @@ function hasImages(items: Item[]): boolean {
 
 function responsesInput(items: Item[]): unknown[] {
   return items.flatMap((i): unknown[] => {
-    if (i.$ === "User") return [{ role: "user", content: content(i.parts.map((p) => p.text), i.imgs) }];
+    if (i.$ === "User") return [{ role: "user", content: content(i.parts.map((p) => p.text), i.imgs, "openai-responses") }];
     if (i.$ === "Turn") return i.out;
-    return i.backs.map((b) => ({ type: "function_call_output", call_id: b.id, output: content([b.out.text], b.out.imgs ?? []) }));
+    return i.backs.map((b) => ({ type: "function_call_output", call_id: b.id, output: content([b.out.text], b.out.imgs ?? [], "openai-responses") }));
   });
 }
+function messagesInput(items: Item[]): Obj[] {
+  const messages: Obj[] = [];
+  const push = (role: string, blocks: unknown[]) => {
+    const last = messages.at(-1);
+    if (last?.role === role) (last.content as unknown[]).push(...blocks);
+    else messages.push({ role, content: [...blocks] });
+  };
+  for (const i of items) {
+    if (i.$ === "User") push("user", content(i.parts.map((p) => p.text), i.imgs, "anthropic-messages"));
+    if (i.$ === "Turn") push("assistant", i.out.map((item) => {
+      const b = object(item);
+      // Pi anthropic-messages convertMessages: unsigned compatible-provider
+      // thinking cannot replay as an Anthropic signed block. Preserve its exact
+      // text, not a fabricated summary (only after a completed, checked turn).
+      return b.type === "thinking" && !b.signature ? { type: "text", text: text(b.thinking) } : b;
+    }));
+    if (i.$ === "Back") push("user", i.backs.map((b) => ({ type: "tool_result", tool_use_id: b.id, is_error: b.out.fail, content: content([b.out.text], b.out.imgs ?? [], "anthropic-messages") })));
+  }
+  return messages;
+}
+function chatInput(model: SubscriptionModel, vendor: SubscriptionVendor, items: Item[]): Obj[] {
+  const messages: Obj[] = [], images: Obj[] = [];
+  for (const i of items) {
+    if (i.$ !== "Back") messages.push(...images.splice(0));
+    if (i.$ === "User") messages.push({ role: "user", content: content(i.parts.map((p) => p.text), i.imgs, "openai-completions") });
+    if (i.$ === "Turn") messages.push(...i.out.map((o) => {
+      const msg = { ...object(o) };
+      if (msg.role !== "assistant") throw new Error("incompatible subscription history");
+      if (model.compat?.requiresReasoningContentOnAssistantMessages && msg.reasoning_content === undefined) msg.reasoning_content = "";
+      // Pi's Go bridge returns `reasoning` but expects reasoning_content on replay.
+      if (vendor === "opencode-go" && typeof msg.reasoning === "string") {
+        msg.reasoning_content = msg.reasoning;
+        delete msg.reasoning;
+      }
+      return msg;
+    }));
+    if (i.$ === "Back") for (const b of i.backs) {
+      messages.push({ role: "tool", tool_call_id: b.id, content: b.out.text });
+      // Tool images must wait until all contiguous tool replies are delivered.
+      if (b.out.imgs?.length) images.push({ role: "user", content: content(["Images from tool result " + b.id], b.out.imgs, "openai-completions") });
+    }
+  }
+  return [...messages, ...images];
+}
+
 function grokSchema(schema: object): object {
   const s = object(schema);
   const key = Array.isArray(s.anyOf) ? "anyOf" : "oneOf";
@@ -69,12 +123,13 @@ function grokSchema(schema: object): object {
   return schema;
 }
 
-export function request(model: SubscriptionModel, _vendor: SubscriptionVendor, ask: Ask, items: Item[], tools: Tool[], max: number): Obj {
+export function request(model: SubscriptionModel, vendor: SubscriptionVendor, ask: Ask, items: Item[], tools: Tool[], max: number): Obj {
   if (ask.model !== model.id && ask.model !== model.label) throw new Error("subscription model does not match request");
   if (!model.speeds.includes(ask.speed)) throw new Error("unsupported subscription speed");
   if (ask.searches > 0) throw new Error("native subscription web search is unsupported");
   if (hasImages(items) && !model.input.includes("image")) throw new Error("subscription model does not accept images");
   const e = effort(model, ask);
+  if (typeof e === "number") throw new Error("unsupported numeric subscription effort mapping");
   if (![max, model.output, model.window].every((n) => Number.isSafeInteger(n) && n > 0)) throw new Error("invalid subscription token budget");
   // Text uses a conservative UTF-8 byte count, not a tokenizer. Pi's
   // utils/estimate.ts reserves 4800/3.5 tokens per image, not base64 bytes.
@@ -88,11 +143,36 @@ export function request(model: SubscriptionModel, _vendor: SubscriptionVendor, a
   if (cap < 16) throw new SubscriptionContextLimit();
   const body: Obj = { model: model.id, stream: true };
   const grok = model.id.startsWith("grok-");
-  Object.assign(body, { store: false, max_output_tokens: cap, input: [{ role: "developer", content: [{ type: "input_text", text: ask.system }] }, ...responsesInput(items)] });
-  if (model.reasoning) {
-    body.include = ["reasoning.encrypted_content"];
-    if (e !== undefined && !model.id.startsWith("grok-build") && !model.id.includes("-reasoning")) body.reasoning = { effort: e };
+  if (model.api === "openai-responses") {
+    Object.assign(body, { store: false, max_output_tokens: cap, input: [{ role: model.compat?.supportsDeveloperRole === false ? "system" : "developer", content: [{ type: "input_text", text: ask.system }] }, ...responsesInput(items)] });
+    if (model.reasoning) {
+      body.include = ["reasoning.encrypted_content"];
+      if (e !== undefined && !model.id.startsWith("grok-build") && !model.id.includes("-reasoning")) body.reasoning = { effort: e };
+    }
+    if (tools.length) body.tools = tools.map((t) => ({ type: "function", name: t.name, description: t.info, parameters: grok ? grokSchema(t.schema) : t.schema }));
+  } else if (model.api === "anthropic-messages") {
+    Object.assign(body, { max_tokens: cap, system: [{ type: "text", text: ask.system }], messages: messagesInput(items) });
+    if (model.reasoning) {
+      if (model.compat?.forceAdaptiveThinking) {
+        body.thinking = { type: "adaptive" };
+        if (e !== undefined) body.output_config = { effort: e };
+      } else {
+        if (cap < 2048) throw new Error("subscription thinking requires at least 2048 output tokens");
+        body.thinking = { type: "enabled", budget_tokens: Math.min(8192, cap - 1024) };
+      }
+    }
+    if (tools.length) body.tools = tools.map((t) => ({ name: t.name, description: t.info, input_schema: t.schema }));
+  } else {
+    Object.assign(body, { [model.compat?.maxTokensField === "max_tokens" ? "max_tokens" : "max_completion_tokens"]: cap, messages: [{ role: model.compat?.supportsDeveloperRole === false ? "system" : "developer", content: ask.system }, ...chatInput(model, vendor, items)] });
+    const format = model.compat?.thinkingFormat;
+    if (format !== undefined && (typeof format !== "string" || !["deepseek", "qwen", "zai", "openai"].includes(format))) throw new Error("unsupported subscription thinking format");
+    if (model.reasoning) {
+      if (format === "deepseek") body.thinking = { type: "enabled" };
+      if (format === "qwen") body.enable_thinking = true;
+      if (format === "zai") body.thinking = { type: "enabled", clear_thinking: false };
+      if (model.compat?.supportsReasoningEffort !== false && e !== undefined) body.reasoning_effort = e;
+    }
+    if (tools.length) body.tools = tools.map((t) => ({ type: "function", function: { name: t.name, description: t.info, parameters: t.schema } }));
   }
-  if (tools.length) body.tools = tools.map((t) => ({ type: "function", name: t.name, description: t.info, parameters: grok ? grokSchema(t.schema) : t.schema }));
   return body;
 }

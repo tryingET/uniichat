@@ -4,11 +4,12 @@ import catalog from "./SubscriptionCatalog.json";
 import { SubscriptionPicks, type SubscriptionVendor } from "./SubscriptionPicks.ts";
 
 export { SUBSCRIPTION_VENDORS, type SubscriptionVendor } from "./SubscriptionPicks.ts";
-export type SubscriptionApi = "openai-responses";
+export type SubscriptionApi = "openai-responses" | "openai-completions" | "anthropic-messages";
 export type SubscriptionModel = {
   label: string; id: string; speeds: string[]; window: number; output: number;
   api: SubscriptionApi; baseUrl: string; reasoning: boolean; input: string[];
-  efforts: string[];
+  efforts: string[]; thinkingLevelMap?: Record<string, string | number | null>;
+  compat?: Record<string, unknown>;
 };
 
 export namespace SubscriptionModels {

@@ -2,7 +2,7 @@
   "provenance": {
     "pi": "b556cfe5b0300a91f39c7bc5369a65a25fb7fcd5",
     "cells": "f5dcf452bcd08b4d877dbc59e60d0bfc43731d08",
-    "note": "Public xAI catalog declarations only; no pricing or entitlement claim. Effort rosters follow pinned Pi getSupportedThinkingLevels restricted to low/medium/high/xhigh/max."
+    "note": "Public xAI and OpenCode Go catalog declarations only; no pricing or entitlement claim. Effort rosters follow pinned Pi getSupportedThinkingLevels restricted to low/medium/high/xhigh/max."
   },
   "models": {
     "xai-sub": {
@@ -45,6 +45,439 @@
           "text",
           "image"
         ]
+      }
+    },
+    "opencode-go": {
+      "minimax-m3": {
+        "output": 131072,
+        "api": "anthropic-messages",
+        "baseUrl": "https://opencode.ai/zen/go",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ]
+      },
+      "deepseek-v4-flash": {
+        "output": 384000,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "thinkingLevelMap": {
+          "minimal": null,
+          "low": "low",
+          "medium": null,
+          "high": "high",
+          "max": "max"
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens",
+          "requiresReasoningContentOnAssistantMessages": true,
+          "thinkingFormat": "deepseek"
+        }
+      },
+      "deepseek-v4-flash-vision-exp": {
+        "output": 384000,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "thinkingLevelMap": {
+          "minimal": null,
+          "low": "low",
+          "medium": null,
+          "high": "high",
+          "max": "max"
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens",
+          "requiresReasoningContentOnAssistantMessages": true,
+          "thinkingFormat": "deepseek"
+        }
+      },
+      "deepseek-v4-pro": {
+        "output": 384000,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "thinkingLevelMap": {
+          "minimal": null,
+          "low": null,
+          "medium": null,
+          "high": "high",
+          "max": "max"
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens",
+          "requiresReasoningContentOnAssistantMessages": true,
+          "thinkingFormat": "deepseek"
+        }
+      },
+      "glm-5.1": {
+        "output": 32768,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "glm-5.2": {
+        "output": 131072,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": null,
+          "medium": null,
+          "high": "high",
+          "xhigh": null,
+          "max": "max"
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "glm-5.3": {
+        "output": 131072,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": "low",
+          "medium": null,
+          "high": "high",
+          "xhigh": null,
+          "max": "max"
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "hy3": {
+        "output": 64000,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "thinkingLevelMap": {
+          "off": "none",
+          "minimal": null,
+          "low": "low",
+          "medium": null,
+          "high": "high",
+          "xhigh": null,
+          "max": null
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "kimi-k2.6": {
+        "output": 65536,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "thinkingLevelMap": {
+          "minimal": null,
+          "low": null,
+          "medium": null
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "thinkingFormat": "deepseek",
+          "supportsReasoningEffort": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "kimi-k2.7-code": {
+        "output": 262144,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "kimi-k3": {
+        "output": 131072,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": null,
+          "medium": null,
+          "high": null,
+          "xhigh": null,
+          "max": "max"
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "longcat-2.0": {
+        "output": 131072,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "mimo-v2.5": {
+        "output": 128000,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "mimo-v2.5-pro": {
+        "output": 128000,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "minimax-m2.7": {
+        "output": 131072,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "ox-alpha-free": {
+        "output": 131072,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": "low",
+          "medium": null,
+          "high": "high",
+          "xhigh": null,
+          "max": "max"
+        },
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "qwen3.6-plus": {
+        "output": 65536,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "thinkingFormat": "qwen",
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "qwen3.7-max": {
+        "output": 65536,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "qwen3.7-plus": {
+        "output": 65536,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "qwen3.8-max": {
+        "output": 131072,
+        "api": "openai-completions",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "compat": {
+          "supportsStore": false,
+          "supportsDeveloperRole": false,
+          "maxTokensField": "max_tokens"
+        }
+      },
+      "gpt-5.6-luna": {
+        "output": 128000,
+        "api": "openai-responses",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": "max"
+        },
+        "compat": {
+          "sessionAffinityFormat": "openai-nosession"
+        }
+      },
+      "grok-4.6": {
+        "output": 500000,
+        "api": "openai-responses",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": null,
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "compat": {
+          "sessionAffinityFormat": "openai-nosession"
+        }
+      },
+      "muse-spark-1.2-contributor": {
+        "output": 131072,
+        "api": "openai-responses",
+        "baseUrl": "https://opencode.ai/zen/go/v1",
+        "reasoning": true,
+        "input": [
+          "text",
+          "image"
+        ],
+        "thinkingLevelMap": {
+          "off": null,
+          "minimal": "minimal",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "compat": {
+          "sessionAffinityFormat": "openai-nosession"
+        }
       }
     }
   }

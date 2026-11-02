@@ -1903,11 +1903,287 @@ var SubscriptionPicks_default = {
         "high"
       ]
     }
+  ],
+  "opencode-go": [
+    {
+      label: "minimax-m3",
+      id: "minimax-m3",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "deepseek-v4-flash",
+      id: "deepseek-v4-flash",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "high",
+        "max"
+      ]
+    },
+    {
+      label: "deepseek-v4-flash-vision-exp",
+      id: "deepseek-v4-flash-vision-exp",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "high",
+        "max"
+      ]
+    },
+    {
+      label: "deepseek-v4-pro",
+      id: "deepseek-v4-pro",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "high",
+        "max"
+      ]
+    },
+    {
+      label: "glm-5.1",
+      id: "glm-5.1",
+      speeds: [
+        "slow"
+      ],
+      window: 202752,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "glm-5.2",
+      id: "glm-5.2",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "high",
+        "max"
+      ]
+    },
+    {
+      label: "glm-5.3",
+      id: "glm-5.3",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "high",
+        "max"
+      ]
+    },
+    {
+      label: "hy3",
+      id: "hy3",
+      speeds: [
+        "slow"
+      ],
+      window: 256000,
+      efforts: [
+        "low",
+        "high"
+      ]
+    },
+    {
+      label: "kimi-k2.6",
+      id: "kimi-k2.6",
+      speeds: [
+        "slow"
+      ],
+      window: 262144,
+      efforts: [
+        "high"
+      ]
+    },
+    {
+      label: "kimi-k2.7-code",
+      id: "kimi-k2.7-code",
+      speeds: [
+        "slow"
+      ],
+      window: 262144,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "kimi-k3",
+      id: "kimi-k3",
+      speeds: [
+        "slow"
+      ],
+      window: 1048576,
+      efforts: [
+        "max"
+      ]
+    },
+    {
+      label: "longcat-2.0",
+      id: "longcat-2.0",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "mimo-v2.5",
+      id: "mimo-v2.5",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "mimo-v2.5-pro",
+      id: "mimo-v2.5-pro",
+      speeds: [
+        "slow"
+      ],
+      window: 1048576,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "minimax-m2.7",
+      id: "minimax-m2.7",
+      speeds: [
+        "slow"
+      ],
+      window: 204800,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "ox-alpha-free",
+      id: "ox-alpha-free",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "high",
+        "max"
+      ]
+    },
+    {
+      label: "qwen3.6-plus",
+      id: "qwen3.6-plus",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "qwen3.7-max",
+      id: "qwen3.7-max",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "qwen3.7-plus",
+      id: "qwen3.7-plus",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "qwen3.8-max",
+      id: "qwen3.8-max",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "gpt-5.6-luna",
+      id: "gpt-5.6-luna",
+      speeds: [
+        "slow"
+      ],
+      window: 1050000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "grok-4.6",
+      id: "grok-4.6",
+      speeds: [
+        "slow"
+      ],
+      window: 500000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "muse-spark-1.2-contributor",
+      id: "muse-spark-1.2-contributor",
+      speeds: [
+        "slow"
+      ],
+      window: 1048576,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    }
   ]
 };
 
 // SubscriptionPicks.ts
-var SUBSCRIPTION_VENDORS = ["xai-sub"];
+var SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go"];
 var SubscriptionPicks;
 ((SubscriptionPicks) => {
   function isVendor(vendor) {
@@ -1936,7 +2212,8 @@ var MODELS = {
   "openai-api": OPENAI,
   "openai-sub": PLAN,
   "claude-sub": [{ ...OPUS, speeds: ["slow"] }, SONNET, HAIKU],
-  "xai-sub": SubscriptionPicks.models("xai-sub")
+  "xai-sub": SubscriptionPicks.models("xai-sub"),
+  "opencode-go": SubscriptionPicks.models("opencode-go")
 };
 var EFFORTS = ["low", "medium", "high", "xhigh", "max"];
 var SPEEDS = ["slow", "fast", "ultrafast"];

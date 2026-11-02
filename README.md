@@ -87,6 +87,8 @@ From source (Bun): `bun install`, `bun run web`, `bun Cli.ts <command>`, `bun ru
 
 **xAI subscription:** `unii serve xai-sub login` (also `status`, `models`, `logout`); choose `xai-sub` independently for chat, compactor and subagents in Settings. No metered-API fallback; check your provider's eligibility and billing settings. Native subscription auth is Linux-only verified; Windows unsupported, macOS unverified. [Required third-party notices](SUBSCRIPTION-NOTICE.md).
 
+**Muse subscription:** `unii serve muse-sub login` (also `status`, `models`, `logout`), then choose `muse-sub` in Settings for chat, compactor or subagents. Requires a subscription-authorized Muse key; the same Linux-only verification and billing limits above apply.
+
 Uninstall
 ---------
 

@@ -21,9 +21,9 @@ export function vendorOf(model: SubscriptionModel): SubscriptionVendor {
   throw new Error("unsupported subscription model/protocol/endpoint combination");
 }
 
-export function destination(_model: SubscriptionModel, _vendor: SubscriptionVendor, base: string): string {
+export function destination(_model: SubscriptionModel, vendor: SubscriptionVendor, base: string): string {
   const clean = base.replace(/\/$/, "");
-  if (clean !== "https://api.x.ai/v1") throw new Error("unsafe subscription inference endpoint");
+  if (clean !== (vendor === "xai-sub" ? "https://api.x.ai/v1" : "https://api.meta.ai/v1")) throw new Error("unsafe subscription inference endpoint");
   return clean + "/responses";
 }
 

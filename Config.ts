@@ -60,6 +60,7 @@ const USABLE: Record<Vendor, string> = {
   "claude-api" : "Anthropic key set",
   "openai-api" : "OpenAI key set",
   "xai-sub": "signed in to xAI subscription",
+  "muse-sub": "signed in to Muse subscription",
 };
 const DEFAULT_MODEL: Record<Vendor, string> = {
   "claude-sub" : "sonnet-5.5",
@@ -67,6 +68,7 @@ const DEFAULT_MODEL: Record<Vendor, string> = {
   "claude-api" : "sonnet-5.5",
   "openai-api" : "gpt-6.1-sol",
   "xai-sub": "grok-4.3",
+  "muse-sub": "muse-spark-1.1",
 };
 
 const NONE     = "Not signed in and no API key: sign in with `unii serve claude login` (or `unii serve chatgpt login`) on the server, or set a key in Settings";
@@ -211,6 +213,7 @@ function config_usable(): Vendor[] {
   const chatgpt = typeof field(CHATGPT, "tokens", "refresh_token") === "string";
   const has: Record<Vendor, boolean> = { "claude-sub": claude, "openai-sub": chatgpt, "claude-api": KEYS.anthropic !== "", "openai-api": KEYS.openai !== "",
     "xai-sub": SubscriptionAuth.status(DIR, "xai-sub").connected,
+    "muse-sub": SubscriptionAuth.status(DIR, "muse-sub").connected,
   };
   return (Object.keys(USABLE) as Vendor[]).filter((v) => has[v]);
 }

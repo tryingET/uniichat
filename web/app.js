@@ -1851,7 +1851,7 @@ var SubscriptionCatalog_default = {
   provenance: {
     pi: "b556cfe5b0300a91f39c7bc5369a65a25fb7fcd5",
     cells: "f5dcf452bcd08b4d877dbc59e60d0bfc43731d08",
-    note: "Public xAI catalog declarations only; no pricing or entitlement claim. Effort rosters follow pinned Pi getSupportedThinkingLevels restricted to low/medium/high/xhigh/max."
+    note: "Public catalog declarations only; no pricing or entitlement claim. Pi xAI and Cells Muse catalog data; effort rosters restricted to low/medium/high/xhigh/max."
   },
   models: {
     "xai-sub": [
@@ -1940,12 +1940,126 @@ var SubscriptionCatalog_default = {
           "high"
         ]
       }
+    ],
+    "muse-sub": [
+      {
+        label: "muse-spark-1.1",
+        id: "muse-spark-1.1",
+        speeds: [
+          "slow"
+        ],
+        window: 1048576,
+        output: 131072,
+        api: "openai-responses",
+        baseUrl: "https://api.meta.ai/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ]
+      },
+      {
+        label: "muse-spark-1.2",
+        id: "muse-spark-1.2",
+        speeds: [
+          "slow"
+        ],
+        window: 1048576,
+        output: 131072,
+        api: "openai-responses",
+        baseUrl: "https://api.meta.ai/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ]
+      },
+      {
+        label: "muse-spark-1.2-contributor",
+        id: "muse-spark-1.2-contributor",
+        speeds: [
+          "slow"
+        ],
+        window: 1048576,
+        output: 131072,
+        api: "openai-responses",
+        baseUrl: "https://api.meta.ai/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ]
+      },
+      {
+        label: "muse-spark-1.3",
+        id: "muse-spark-1.3",
+        speeds: [
+          "slow"
+        ],
+        window: 1048576,
+        output: 131072,
+        api: "openai-responses",
+        baseUrl: "https://api.meta.ai/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ]
+      },
+      {
+        label: "muse-spark-1.3-contributor",
+        id: "muse-spark-1.3-contributor",
+        speeds: [
+          "slow"
+        ],
+        window: 1048576,
+        output: 131072,
+        api: "openai-responses",
+        baseUrl: "https://api.meta.ai/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ]
+      }
     ]
   }
 };
 
 // SubscriptionModels.ts
-var SUBSCRIPTION_VENDORS = ["xai-sub"];
+var SUBSCRIPTION_VENDORS = ["xai-sub", "muse-sub"];
 var SubscriptionModels;
 ((SubscriptionModels) => {
   function isVendor(vendor) {
@@ -1978,7 +2092,8 @@ var MODELS = {
   "openai-api": OPENAI,
   "openai-sub": PLAN,
   "claude-sub": [{ ...OPUS, speeds: ["slow"] }, SONNET, HAIKU],
-  "xai-sub": SubscriptionModels.models("xai-sub")
+  "xai-sub": SubscriptionModels.models("xai-sub"),
+  "muse-sub": SubscriptionModels.models("muse-sub")
 };
 var EFFORTS = ["low", "medium", "high", "xhigh", "max"];
 var SPEEDS = ["slow", "fast", "ultrafast"];

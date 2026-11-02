@@ -43,6 +43,7 @@ const MODELS: Record<Vendor, Model[]> = {
   "openai-sub": PLAN,
   "claude-sub": [{ ...OPUS, speeds: ["slow"] }, SONNET, HAIKU],
   "xai-sub": SubscriptionModels.models("xai-sub"),
+  "muse-sub": SubscriptionModels.models("muse-sub"),
 };
 
 export const EFFORTS = ["low", "medium", "high", "xhigh", "max"];

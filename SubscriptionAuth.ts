@@ -38,11 +38,12 @@ export namespace SubscriptionAuth {
       cancelled(signal);
       const old = load(dir, vendor);
       if (!old || old.blocked) throw new Error("Subscription not connected; run login for " + vendor);
-      if (old.pending) throw new Error("Subscription refresh outcome uncertain; log in again (refresh will not be replayed)");
+      if (old.pending && vendor === "xai-sub") throw new Error("Subscription refresh outcome uncertain; log in again (refresh will not be replayed)");
       if (!old.pending) usable(old);
       if (!old.pending && old.access !== refused && old.expires > Date.now() + 5 * 60_000) return old;
       // Clear access before dispatch. Crash, timeout, invalid JSON or an
       // uncertain response leaves this durable marker; NEVER replay that refresh.
+      // Muse uses a nonrotating identity and can safely retry its remint.
       save(dir, vendor, { ...old, access: "", pending: true });
       try {
         const next = await renew(old);

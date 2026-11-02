@@ -33,6 +33,7 @@ export namespace SubscriptionWire {
       headers: (key, _ask) => {
         endpoint();
         const headers: Record<string, string> = { authorization: "Bearer " + key, "content-type": "application/json" };
+        if (vendor === "muse-sub") headers["x-api-version"] = "1.0.0";
         return headers;
       },
       body: (ask, items, tools, max) => {

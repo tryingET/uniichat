@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as config from "./Config.ts";
-import { LABELS } from "./Pick.ts";
+import { LABELS, type Available } from "./Pick.ts";
 import { write_whole } from "./Write.ts";
 import { err_code, err_why } from "./Err.ts";
 import { get, rec } from "./Json.ts";
@@ -19,7 +19,7 @@ export type Row = {
 
 export type Key = { name: string; env: string; from: config.From; tail: string };
 
-export type Page = { version: string; settings: Row[]; keys: Key[]; profiles: Record<string, string[]> | null; error: string | null; none: string | null };
+export type Page = { version: string; settings: Row[]; keys: Key[]; profiles: Record<string, string[]> | null; error: string | null; none: string | null; available?: Available };
 
 type Out = { status: number; body: object; saved: string[]; wrote: boolean };
 
@@ -69,7 +69,7 @@ export namespace Settings {
       return { name, env, from, tail: Settings.tail(key) };
     });
     const profiles = process.env.UNII_PROFILES !== undefined ? null : Settings.profiles(file.profiles) ?? {};
-    return { version: snap.version, settings, keys: shown, profiles, error, none: config.config_none() };
+    return { version: snap.version, settings, keys: shown, profiles, error, none: config.config_none(), available: config.config_available() };
   }
 
   export function tail(key: string): string {

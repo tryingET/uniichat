@@ -65,13 +65,13 @@ async function keyFromStdin(signal?: AbortSignal): Promise<string> {
 }
 export namespace SubscriptionAuth {
   // Local provisioning snapshot, not a live entitlement or billing assertion.
-  export function status(dir: string, vendor: SubscriptionVendor): { connected: boolean; endpoint?: string } {
+  export function status(dir: string, vendor: SubscriptionVendor): { connected: boolean; endpoint?: string; models?: string[] } {
     check(vendor);
     try {
       const c = load(dir, vendor);
       if (!c || c.pending || c.blocked) return { connected: false };
       usable(c);
-      return { connected: true, endpoint: c.endpoint };
+      return { connected: true, endpoint: c.endpoint, ...(c.models ? { models: [...c.models] } : {}) };
     } catch { return { connected: false }; }
   }
   export async function session(dir: string, vendor: SubscriptionVendor, refused?: string, signal?: AbortSignal): Promise<Credential> {
@@ -85,9 +85,10 @@ export namespace SubscriptionAuth {
       if (!old.pending) usable(old);
       if (!old.pending && old.access !== refused && old.expires > Date.now() + 5 * 60_000) return old;
       if (vendor === "opencode-go") throw new Denied();
-      // Clear access before dispatch. Crash, timeout, invalid JSON or an
+      // Clear access/models before dispatch. Crash, timeout, invalid JSON or an
       // uncertain response leaves this durable marker; NEVER replay that refresh.
-      save(dir, vendor, { ...old, access: "", pending: true });
+      // Nonrotating identity remints can safely retry this unavailable state.
+      save(dir, vendor, { ...old, access: "", models: undefined, pending: true });
       try {
         const next = await renew(old);
         usable(next);
@@ -111,7 +112,7 @@ export namespace SubscriptionAuth {
       await locked(dir, vendor, () => { forget(dir, vendor);  return Promise.resolve(); });
       console.log(vendor + ": local credentials removed (provider session not revoked)");
     } else if (args[0] === "status" || args[0] === "models") {
-      // Local snapshot only; never a live entitlement or quota check.
+      // Local snapshot only; Copilot models are the last enabled account roster.
       const connection = status(dir, vendor);
       console.log(JSON.stringify(args[0] === "models" ? { ...connection, catalog: SubscriptionModels.models(vendor).map((m) => m.id), catalog_scope: "public capabilities, not account entitlement" } : connection));
     } else {

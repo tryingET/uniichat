@@ -2179,11 +2179,446 @@ var SubscriptionPicks_default = {
         "xhigh"
       ]
     }
+  ],
+  "copilot-sub": [
+    {
+      label: "claude-haiku-4.5",
+      id: "claude-haiku-4.5",
+      speeds: [
+        "slow"
+      ],
+      window: 200000,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "claude-opus-4.5",
+      id: "claude-opus-4.5",
+      speeds: [
+        "slow"
+      ],
+      window: 200000,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "claude-opus-4.6",
+      id: "claude-opus-4.6",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ]
+    },
+    {
+      label: "claude-opus-4.7",
+      id: "claude-opus-4.7",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "claude-opus-4.8",
+      id: "claude-opus-4.8",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "claude-opus-5",
+      id: "claude-opus-5",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "claude-sonnet-4",
+      id: "claude-sonnet-4",
+      speeds: [
+        "slow"
+      ],
+      window: 216000,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "claude-sonnet-4.5",
+      id: "claude-sonnet-4.5",
+      speeds: [
+        "slow"
+      ],
+      window: 200000,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "claude-sonnet-4.6",
+      id: "claude-sonnet-4.6",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ]
+    },
+    {
+      label: "claude-sonnet-5",
+      id: "claude-sonnet-5",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "claude-fable-5",
+      id: "claude-fable-5",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "gemini-3.1-pro-preview",
+      id: "gemini-3.1-pro-preview",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "gemini-3.5-flash",
+      id: "gemini-3.5-flash",
+      speeds: [
+        "slow"
+      ],
+      window: 200000,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "gemini-3.6-flash",
+      id: "gemini-3.6-flash",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "gemini-3.7-flash",
+      id: "gemini-3.7-flash",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "gpt-4.1",
+      id: "gpt-4.1",
+      speeds: [
+        "slow"
+      ],
+      window: 128000,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "kimi-k2.7-code",
+      id: "kimi-k2.7-code",
+      speeds: [
+        "slow"
+      ],
+      window: 256000,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "kimi-k3",
+      id: "kimi-k3",
+      speeds: [
+        "slow"
+      ],
+      window: 1048576,
+      efforts: [
+        "medium"
+      ]
+    },
+    {
+      label: "gpt-5-mini",
+      id: "gpt-5-mini",
+      speeds: [
+        "slow"
+      ],
+      window: 264000,
+      efforts: [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    {
+      label: "gpt-5.2",
+      id: "gpt-5.2",
+      speeds: [
+        "slow"
+      ],
+      window: 400000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "gpt-5.2-codex",
+      id: "gpt-5.2-codex",
+      speeds: [
+        "slow"
+      ],
+      window: 400000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "gpt-5.3-codex",
+      id: "gpt-5.3-codex",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "gpt-5.4",
+      id: "gpt-5.4",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "gpt-5.4-mini",
+      id: "gpt-5.4-mini",
+      speeds: [
+        "slow"
+      ],
+      window: 400000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "gpt-5.4-nano",
+      id: "gpt-5.4-nano",
+      speeds: [
+        "slow"
+      ],
+      window: 400000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "gpt-5.5",
+      id: "gpt-5.5",
+      speeds: [
+        "slow"
+      ],
+      window: 1e6,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "gpt-5.6-luna",
+      id: "gpt-5.6-luna",
+      speeds: [
+        "slow"
+      ],
+      window: 1050000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "gpt-5.6-sol",
+      id: "gpt-5.6-sol",
+      speeds: [
+        "slow"
+      ],
+      window: 1050000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "gpt-5.6-terra",
+      id: "gpt-5.6-terra",
+      speeds: [
+        "slow"
+      ],
+      window: 1050000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      label: "grok-4.5",
+      id: "grok-4.5",
+      speeds: [
+        "slow"
+      ],
+      window: 500000,
+      efforts: [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    {
+      label: "grok-4.6",
+      id: "grok-4.6",
+      speeds: [
+        "slow"
+      ],
+      window: 500000,
+      efforts: [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      label: "mai-code-1-flash-picker",
+      id: "mai-code-1-flash-picker",
+      speeds: [
+        "slow"
+      ],
+      window: 256000,
+      efforts: [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    {
+      label: "mai-code-1.1-flash",
+      id: "mai-code-1.1-flash",
+      speeds: [
+        "slow"
+      ],
+      window: 256000,
+      efforts: [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
   ]
 };
 
 // SubscriptionPicks.ts
-var SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go"];
+var SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go", "copilot-sub"];
 var SubscriptionPicks;
 ((SubscriptionPicks) => {
   function isVendor(vendor) {
@@ -2213,7 +2648,8 @@ var MODELS = {
   "openai-sub": PLAN,
   "claude-sub": [{ ...OPUS, speeds: ["slow"] }, SONNET, HAIKU],
   "xai-sub": SubscriptionPicks.models("xai-sub"),
-  "opencode-go": SubscriptionPicks.models("opencode-go")
+  "opencode-go": SubscriptionPicks.models("opencode-go"),
+  "copilot-sub": SubscriptionPicks.models("copilot-sub")
 };
 var EFFORTS = ["low", "medium", "high", "xhigh", "max"];
 var SPEEDS = ["slow", "fast", "ultrafast"];
@@ -2235,14 +2671,18 @@ var Pick;
     return model?.efforts ?? EFFORTS;
   }
   Pick2.efforts = efforts;
-  function models(vendors, labels) {
-    return vendors.flatMap((v) => MODELS[v].filter((m) => labels.includes(m.label)).map((m) => [v, m]));
+  function allowed(vendor, model, available) {
+    return vendor !== "copilot-sub" || (available?.[vendor]?.includes(model.id) ?? false);
+  }
+  Pick2.allowed = allowed;
+  function models(vendors, labels, available) {
+    return vendors.flatMap((v) => MODELS[v].filter((m) => labels.includes(m.label) && allowed(v, m, available)).map((m) => [v, m]));
   }
   Pick2.models = models;
   function options(pick, move, offer) {
     const speeds = Pick.model(pick.vendor, pick.model)?.speeds ?? [];
     const { profile: _, ...plain } = pick;
-    const all = Pick.models(offer.vendors, offer.models).map(([v, m]) => [m.label, Pick.on(plain, v, m)]);
+    const all = Pick.models(offer.vendors, offer.models, offer.available).map(([v, m]) => [m.label, Pick.on(plain, v, m)]);
     const profiles = Object.keys(offer.profiles ?? {}).flatMap((name) => {
       const on = Pick.profile(name, offer, pick.effort, pick.speed);
       return on === null ? [] : [[name, on]];
@@ -2279,8 +2719,8 @@ var Pick;
     return hit === undefined ? null : hit[1];
   }
   Pick2.move = move;
-  function to_model(pick, label, vendors, { models }) {
-    const all = Pick.models(vendors, models).filter(([, m]) => m.label === label);
+  function to_model(pick, label, vendors, { models, available }) {
+    const all = Pick.models(vendors, models, available).filter(([, m]) => m.label === label);
     const hit = all.find(([v]) => v === pick.vendor) ?? all[0];
     return hit === undefined ? null : Pick.on(pick, hit[0], hit[1]);
   }
@@ -2315,27 +2755,27 @@ var Pick;
     return all.filter((p, k) => all.findIndex((q) => q.vendor === p.vendor && q.model === p.model) === k);
   }
   Pick2.falls = falls;
-  function profile(name, offer, effort, speed) {
+  function profile(name, offer, effort, speed, require_available = true) {
     const profiles = offer.profiles ?? {};
     const first = Object.hasOwn(profiles, name) ? profiles[name][0] : undefined;
-    if (first === undefined) {
+    if (first === undefined || require_available && profiles[name].some((f) => !allowed(f.vendor, f.model, offer.available))) {
       return null;
     }
     const on = Pick.on({ vendor: first.vendor, model: first.model.label, effort, speed }, first.vendor, first.model);
     return { ...on, effort: first.effort ?? on.effort, speed: first.speed ?? on.speed, profile: name };
   }
   Pick2.profile = profile;
-  function read(x, offer) {
+  function read(x, offer, require_available = true) {
     const [profile, effort, speed, label] = [get(x, "profile"), get(x, "effort"), get(x, "speed"), get(x, "model")];
     if (profile !== undefined) {
-      return typeof profile === "string" && typeof effort === "string" && EFFORTS.includes(effort) ? Pick.profile(profile, offer, effort, String(speed)) : null;
+      return typeof profile === "string" && typeof effort === "string" && EFFORTS.includes(effort) ? Pick.profile(profile, offer, effort, String(speed), require_available) : null;
     }
     const vendor = offer.vendors.find((v) => v === get(x, "vendor"));
     if (vendor === undefined || typeof label !== "string" || !offer.models.includes(label)) {
       return null;
     }
     const model = Pick.model(vendor, label);
-    if (model === undefined || typeof effort !== "string" || !efforts(model).includes(effort) || typeof speed !== "string" || !model.speeds.includes(speed)) {
+    if (model === undefined || require_available && !allowed(vendor, model, offer.available) || typeof effort !== "string" || !efforts(model).includes(effort) || typeof speed !== "string" || !model.speeds.includes(speed)) {
       return null;
     }
     return { vendor, model: label, effort, speed };
@@ -2348,7 +2788,7 @@ var Pick;
   }
   Pick2.window = window2;
   function load(saved, offer, def) {
-    return Pick.read(saved ?? def, offer) ?? def;
+    return Pick.read(saved ?? def, offer, false) ?? def;
   }
   Pick2.load = load;
 })(Pick ||= {});
@@ -3611,7 +4051,7 @@ function settings_html(page) {
   const rows = new Map(page.settings.filter((r) => r.web && r.from !== "env").map((r) => [r.key, r]));
   const group = ([title, keys]) => {
     const shown = keys.flatMap((k) => rows.get(k) ?? []);
-    return shown.length === 0 ? "" : section_html(title, shown.map(setting_html).join(""));
+    return shown.length === 0 ? "" : section_html(title, shown.map((r) => setting_html(r, page.available)).join(""));
   };
   const shown = page.keys.filter((k) => k.from !== "env");
   const keys = shown.length === 0 ? "" : section_html("Keys", `<p class="sub">Kept in keys.json in the server's folder, readable by the server's user only, and never shown again, only their last characters.</p>` + shown.map(key_html).join(""));
@@ -3622,8 +4062,8 @@ function settings_html(page) {
   const profiles = page.profiles === null ? "" : section_html("Profiles", `<p class="sub">Ranked models: a chat on a profile runs on the first and falls back to the next when one is out.</p><div class="set profiles" data-key="profiles"><div class="field"></div><p class="err"></p></div>`);
   return head + error + none + `<form class="settings" autocomplete="off">` + group(GROUPS[0]) + profiles + keys + group(GROUPS[1]) + save + `</form>`;
 }
-function offered(vendors, models) {
-  return Pick.models(VENDORS.filter((v) => vendors.includes(v)), models).map(([v, m]) => v + ":" + m.label);
+function offered(vendors, models, available) {
+  return Pick.models(VENDORS.filter((v) => vendors.includes(v)), models, available).map(([v, m]) => v + ":" + m.label);
 }
 function profiles_html(profiles, offered) {
   const model = (m, i, j) => {
@@ -3639,19 +4079,19 @@ function profiles_html(profiles, offered) {
   const one = ([name, list], i) => `<div class="prof" data-i="${i}"><div class="name"><input class="pname" data-i="${i}" value="${esc(name)}" aria-label="Name" placeholder="Enter the profile name here" maxlength="60" spellcheck="false" autocapitalize="off"><button type="button" class="chip red pdel" data-i="${i}">Delete</button></div><ol>${list.map((m, j) => model(m, i, j)).join("")}</ol>${add(list, i)}</div>`;
   return profiles.map(one).join("") + `<button type="button" class="chip pnew">Add profile</button>`;
 }
-function setting_html(r) {
+function setting_html(r, available) {
   const [name, about] = SETTING[r.key] ?? [r.key, ""];
   const id = "set-" + r.key + (PICKS.includes(r.key) ? "-vendor" : "");
   const label = `<label for="${id}">${esc(name)}<small>${esc(about)} <code>${esc(r.key)}</code></small></label>`;
-  return `<div class="set" data-key="${esc(r.key)}">${label}<div class="field">${control_html(r)}</div>${from_html(r)}<p class="err"></p></div>`;
+  return `<div class="set" data-key="${esc(r.key)}">${label}<div class="field">${control_html(r, available)}</div>${from_html(r)}<p class="err"></p></div>`;
 }
-function control_html(r) {
+function control_html(r, available) {
   switch (r.key) {
     case "vendors": {
       return checks_html("vendors", VENDORS, list2(r.value), () => "") + `<p class="warn"></p>`;
     }
     case "models": {
-      return checks_html("models", LABELS, list2(r.value), (x) => Pick.models(VENDORS, [x]).map(([vendor]) => vendor).join(" "));
+      return checks_html("models", LABELS, list2(r.value), (x) => Pick.models(VENDORS, [x], available).map(([vendor]) => vendor).join(" "));
     }
     case "pick":
     case "compactor":
@@ -3693,11 +4133,11 @@ function key_html(k) {
   const label = `<label for="${id}">${esc(name)}<small>${esc(about)} <code>${esc(k.env)}</code></small></label>`;
   return `<div class="set key" data-key="key.${esc(k.name)}">${label}<div class="field">${field}</div><p class="from">${from}${reset}</p><p class="err"></p></div>`;
 }
-function picks_html(key, vendors, models, value, none, profiles = []) {
+function picks_html(key, vendors, models, value, none, profiles = [], available) {
   const [vendor = "", model = "", effort = "", speed = ""] = value === "" ? [] : value.split(":");
   const known = VENDORS.includes(vendor);
   const offered = VENDORS.filter((v) => vendors.includes(v));
-  const labels = known ? Pick.models([vendor], models).map(([, m]) => m.label) : [];
+  const labels = known ? Pick.models([vendor], models, available).map(([, m]) => m.label) : [];
   const speeds = known ? Pick.model(vendor, model)?.speeds ?? [] : [];
   const select = (part, name, all, on, first) => {
     const opts = [...first === null ? [] : [["", first]], ...all.includes(on) || on === "" && first !== null ? [] : [[on, on + " (not offered)"]], ...all.map((x) => [x, x])];
@@ -3707,7 +4147,7 @@ function picks_html(key, vendors, models, value, none, profiles = []) {
   const head = select("vendor", "Vendor", [...offered, ...profiles], vendor, none);
   return vendor === "" || profiles.includes(vendor) ? head : head + select("model", "Model", labels, model, null) + select("effort", "Effort", Pick.efforts(known ? Pick.model(vendor, model) : undefined), effort, null) + select("speed", "Speed", speeds, speed, null);
 }
-function pick_mend(parts, models, profiles = []) {
+function pick_mend(parts, models, profiles = [], available) {
   const [vendor = "", model = "", effort = "", speed = ""] = parts;
   if (profiles.includes(vendor)) {
     return vendor;
@@ -3715,7 +4155,7 @@ function pick_mend(parts, models, profiles = []) {
   if (!VENDORS.includes(vendor)) {
     return vendor === "" ? "" : parts.join(":");
   }
-  const offered = Pick.models([vendor], models).map(([, m]) => m);
+  const offered = Pick.models([vendor], models, available).map(([, m]) => m);
   const m = offered.find((m) => m.label === model) ?? offered[0];
   if (m === undefined) {
     return parts.join(":");
@@ -5772,7 +6212,7 @@ function settings_draw(page) {
       const four = value?.parentElement?.querySelector(".four");
       if (value && four) {
         const focus = document.activeElement?.name;
-        four.innerHTML = picks_html(key, vendors, listed("models"), value.value, key === "agents" ? "The chat's pick" : null, names());
+        four.innerHTML = picks_html(key, vendors, listed("models"), value.value, key === "agents" ? "The chat's pick" : null, names(), page.available);
         four.querySelector(`select[name="${focus}"]`)?.focus();
       }
     }
@@ -5797,7 +6237,7 @@ function settings_draw(page) {
     must(el.querySelector(".err"), "the setting's err").textContent = "";
     const value = el.querySelector("input[type=hidden]");
     if (value !== null) {
-      value.value = pick_mend([...el.querySelectorAll("select")].map((s) => s.value), listed("models"), names());
+      value.value = pick_mend([...el.querySelectorAll("select")].map((s) => s.value), listed("models"), names(), page.available);
     }
     picks();
     if (el.dataset.key === "vendors" || el.dataset.key === "models") {
@@ -5826,7 +6266,7 @@ function settings_draw(page) {
   };
   const profs_draw = (focus) => {
     if (box !== null) {
-      box.innerHTML = profiles_html(profs, offered(listed("vendors"), listed("models")));
+      box.innerHTML = profiles_html(profs, offered(listed("vendors"), listed("models"), page.available));
       (focus === undefined ? null : box.querySelector(focus) ?? box.querySelector(".pnew"))?.focus();
     }
   };

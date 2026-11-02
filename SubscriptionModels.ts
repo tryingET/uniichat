@@ -9,7 +9,7 @@ export type SubscriptionModel = {
   label: string; id: string; speeds: string[]; window: number; output: number;
   api: SubscriptionApi; baseUrl: string; reasoning: boolean; input: string[];
   efforts: string[]; thinkingLevelMap?: Record<string, string | number | null>;
-  compat?: Record<string, unknown>;
+  compat?: Record<string, unknown>; headers?: Record<string, string>;
 };
 
 export namespace SubscriptionModels {

@@ -329,5 +329,440 @@
         "xhigh"
       ]
     }
+  ],
+  "copilot-sub": [
+    {
+      "label": "claude-haiku-4.5",
+      "id": "claude-haiku-4.5",
+      "speeds": [
+        "slow"
+      ],
+      "window": 200000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "claude-opus-4.5",
+      "id": "claude-opus-4.5",
+      "speeds": [
+        "slow"
+      ],
+      "window": 200000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "claude-opus-4.6",
+      "id": "claude-opus-4.6",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ]
+    },
+    {
+      "label": "claude-opus-4.7",
+      "id": "claude-opus-4.7",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      "label": "claude-opus-4.8",
+      "id": "claude-opus-4.8",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      "label": "claude-opus-5",
+      "id": "claude-opus-5",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      "label": "claude-sonnet-4",
+      "id": "claude-sonnet-4",
+      "speeds": [
+        "slow"
+      ],
+      "window": 216000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "claude-sonnet-4.5",
+      "id": "claude-sonnet-4.5",
+      "speeds": [
+        "slow"
+      ],
+      "window": 200000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "claude-sonnet-4.6",
+      "id": "claude-sonnet-4.6",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ]
+    },
+    {
+      "label": "claude-sonnet-5",
+      "id": "claude-sonnet-5",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      "label": "claude-fable-5",
+      "id": "claude-fable-5",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      "label": "gemini-3.1-pro-preview",
+      "id": "gemini-3.1-pro-preview",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "gemini-3.5-flash",
+      "id": "gemini-3.5-flash",
+      "speeds": [
+        "slow"
+      ],
+      "window": 200000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "gemini-3.6-flash",
+      "id": "gemini-3.6-flash",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "gemini-3.7-flash",
+      "id": "gemini-3.7-flash",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "gpt-4.1",
+      "id": "gpt-4.1",
+      "speeds": [
+        "slow"
+      ],
+      "window": 128000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "kimi-k2.7-code",
+      "id": "kimi-k2.7-code",
+      "speeds": [
+        "slow"
+      ],
+      "window": 256000,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "kimi-k3",
+      "id": "kimi-k3",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1048576,
+      "efforts": [
+        "medium"
+      ]
+    },
+    {
+      "label": "gpt-5-mini",
+      "id": "gpt-5-mini",
+      "speeds": [
+        "slow"
+      ],
+      "window": 264000,
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    {
+      "label": "gpt-5.2",
+      "id": "gpt-5.2",
+      "speeds": [
+        "slow"
+      ],
+      "window": 400000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      "label": "gpt-5.2-codex",
+      "id": "gpt-5.2-codex",
+      "speeds": [
+        "slow"
+      ],
+      "window": 400000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      "label": "gpt-5.3-codex",
+      "id": "gpt-5.3-codex",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      "label": "gpt-5.4",
+      "id": "gpt-5.4",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      "label": "gpt-5.4-mini",
+      "id": "gpt-5.4-mini",
+      "speeds": [
+        "slow"
+      ],
+      "window": 400000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      "label": "gpt-5.4-nano",
+      "id": "gpt-5.4-nano",
+      "speeds": [
+        "slow"
+      ],
+      "window": 400000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      "label": "gpt-5.5",
+      "id": "gpt-5.5",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1000000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      "label": "gpt-5.6-luna",
+      "id": "gpt-5.6-luna",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1050000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      "label": "gpt-5.6-sol",
+      "id": "gpt-5.6-sol",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1050000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      "label": "gpt-5.6-terra",
+      "id": "gpt-5.6-terra",
+      "speeds": [
+        "slow"
+      ],
+      "window": 1050000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    {
+      "label": "grok-4.5",
+      "id": "grok-4.5",
+      "speeds": [
+        "slow"
+      ],
+      "window": 500000,
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    {
+      "label": "grok-4.6",
+      "id": "grok-4.6",
+      "speeds": [
+        "slow"
+      ],
+      "window": 500000,
+      "efforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh"
+      ]
+    },
+    {
+      "label": "mai-code-1-flash-picker",
+      "id": "mai-code-1-flash-picker",
+      "speeds": [
+        "slow"
+      ],
+      "window": 256000,
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    {
+      "label": "mai-code-1.1-flash",
+      "id": "mai-code-1.1-flash",
+      "speeds": [
+        "slow"
+      ],
+      "window": 256000,
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
   ]
 }

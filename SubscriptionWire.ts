@@ -1,8 +1,10 @@
+// Native subscription inference. No SDK, auth store, config, fetch,
+// service setup, or HTTP calls here. Chat and compaction use the same Wire.
 import type { Ask } from "./AskAI.ts";
 import { VERSION } from "./Update.ts";
 import type { Step, Wire } from "./Agent.ts";
 import type { SubscriptionModel } from "./SubscriptionModels.ts";
-import { destination, object, request, vendorOf } from "./SubscriptionRequest.ts";
+import { destination, hasImages, object, request, vendorOf } from "./SubscriptionRequest.ts";
 import * as Stream from "./SubscriptionStream.ts";
 
 type State = Stream.State;
@@ -15,7 +17,7 @@ type NativeWire = Wire<State, unknown> & { auth: Connection["auth"]; reject: (re
 export namespace SubscriptionWire {
   export function wire(model: SubscriptionModel, connection: Connection): NativeWire {
     const vendor = vendorOf(model);
-    const contexts = new WeakMap<Ask, { allowed: Set<string> }>();
+    const contexts = new WeakMap<Ask, { allowed: Set<string>; initiator: string; vision: boolean }>();
     // Fail unsafe catalog defaults immediately; validate callback output anew
     // after every auth/refresh, including before preparing credential headers.
     destination(model, vendor, model.baseUrl);
@@ -40,11 +42,24 @@ export namespace SubscriptionWire {
             headers["x-api-key"] = key;
           }
         }
+        if (vendor === "copilot-sub") {
+          // Only catalog editor identity headers, never arbitrary auth/host headers.
+          for (const name of ["User-Agent", "Editor-Version", "Editor-Plugin-Version", "Copilot-Integration-Id"]) {
+            const value = model.headers?.[name];
+            if (!value) throw new Error("missing Copilot editor identity");
+            headers[name] = value;
+          }
+          const ctx = contexts.get(ask);
+          if (!ctx) throw new Error("Copilot headers require a prepared request");
+          headers["X-Initiator"] = ctx.initiator;
+          headers["Openai-Intent"] = "conversation-edits";
+          if (ctx.vision) headers["Copilot-Vision-Request"] = "true";
+        }
         return headers;
       },
       body: (ask, items, tools, max) => {
         const body = request(model, vendor, ask, items, tools, max);
-        contexts.set(ask, { allowed: new Set(tools.map((t) => t.name)) });
+        contexts.set(ask, { allowed: new Set(tools.map((t) => t.name)), initiator: items.at(-1)?.$ === "User" ? "user" : "agent", vision: hasImages(items) });
         return body;
       },
       start: (ask) => Stream.start(model.api, contexts.get(ask)?.allowed ?? new Set()),

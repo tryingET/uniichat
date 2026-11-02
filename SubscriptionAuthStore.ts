@@ -9,7 +9,7 @@ import { SubscriptionModels } from "./SubscriptionModels.ts";
 
 export type Credential = {
   vendor: SubscriptionVendor; access: string; refresh?: string; expires: number;
-  endpoint: string; scope?: string; pending?: boolean; blocked?: boolean;
+  endpoint: string; models?: string[]; scope?: string; pending?: boolean; blocked?: boolean;
 };
 function vendorCheck(vendor: SubscriptionVendor): void {
   if (!SubscriptionModels.isVendor(vendor)) throw new Error("Unknown subscription vendor");
@@ -64,7 +64,8 @@ export function load(dir: string, vendor: SubscriptionVendor): Credential | unde
         (c.refresh !== undefined && typeof c.refresh !== "string") ||
         (c.scope !== undefined && typeof c.scope !== "string") ||
         (c.pending !== undefined && typeof c.pending !== "boolean") ||
-        (c.blocked !== undefined && typeof c.blocked !== "boolean")) {
+        (c.blocked !== undefined && typeof c.blocked !== "boolean") ||
+        (c.models !== undefined && (!Array.isArray(c.models) || c.models.some(m => typeof m !== "string")))) {
       throw new Error("Invalid subscription auth state");
     }
     return c;

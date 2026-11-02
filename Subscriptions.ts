@@ -16,6 +16,9 @@ export namespace Subscriptions {
       auth: async (refused, signal) => {
         // Token, destination and entitlement come from one locked credential read.
         const session = await SubscriptionAuth.session(config.DIR, vendor, refused, signal);
+        if (vendor === "copilot-sub" && !session.models?.includes(model.id)) {
+          throw new Error("Subscription model is not available to this account");
+        }
         endpoint = session.endpoint;
         return session.access;
       },

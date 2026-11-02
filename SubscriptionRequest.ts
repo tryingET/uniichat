@@ -163,7 +163,7 @@ export function request(model: SubscriptionModel, vendor: SubscriptionVendor, as
     }
     if (tools.length) body.tools = tools.map((t) => ({ name: t.name, description: t.info, input_schema: t.schema }));
   } else {
-    Object.assign(body, { [model.compat?.maxTokensField === "max_tokens" ? "max_tokens" : "max_completion_tokens"]: cap, messages: [{ role: model.compat?.supportsDeveloperRole === false ? "system" : "developer", content: ask.system }, ...chatInput(model, vendor, items)] });
+    Object.assign(body, { stream_options: { include_usage: true }, [model.compat?.maxTokensField === "max_tokens" ? "max_tokens" : "max_completion_tokens"]: cap, messages: [{ role: model.compat?.supportsDeveloperRole === false ? "system" : "developer", content: ask.system }, ...chatInput(model, vendor, items)] });
     const format = model.compat?.thinkingFormat;
     if (format !== undefined && (typeof format !== "string" || !["deepseek", "qwen", "zai", "openai"].includes(format))) throw new Error("unsupported subscription thinking format");
     if (model.reasoning) {

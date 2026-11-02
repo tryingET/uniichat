@@ -97,7 +97,7 @@ function chat(st: State, ev: Obj, on: Emit): void {
   if (choice.index !== 0) throw new Error("invalid subscription completion choice");
   const d = choice.delta == null ? {} : object(choice.delta);
   if (d.refusal) throw new Error("subscription response refused");
-  if (d.role !== undefined && d.role !== "assistant") throw new Error("invalid subscription completion role");
+  if (d.role != null && d.role !== "assistant") throw new Error("invalid subscription completion role");
   // Keep the provider's replay field, not a fabricated summary.
   for (const field of ["reasoning_content", "reasoning", "reasoning_text"]) {
     if (typeof d[field] === "string" && d[field]) {
@@ -105,7 +105,7 @@ function chat(st: State, ev: Obj, on: Emit): void {
       break;
     }
   }
-  if (d.reasoning_details !== undefined) {
+  if (d.reasoning_details != null) {
     if (!Array.isArray(d.reasoning_details)) throw new Error("invalid encrypted subscription reasoning");
     const prev = (st.message.reasoning_details ?? []) as unknown[];
     for (const detail of d.reasoning_details) {
@@ -118,26 +118,26 @@ function chat(st: State, ev: Obj, on: Emit): void {
     st.message.reasoning_details = prev;
   }
   if (d.content != null) on("unii", append(st.message, "content", d.content));
-  if (d.function_call !== undefined) throw new Error("legacy subscription function calls are unsupported");
-  if (d.tool_calls !== undefined) {
+  if (d.function_call != null) throw new Error("legacy subscription function calls are unsupported");
+  if (d.tool_calls != null) {
     if (!Array.isArray(d.tool_calls)) throw new Error("invalid subscription tool deltas");
     for (const delta of d.tool_calls) {
       const t = object(delta);
       const k = index(t.index);
-      if (t.type !== undefined && t.type !== "function") throw new Error("unsupported subscription tool call type");
+      if (t.type != null && t.type !== "function") throw new Error("unsupported subscription tool call type");
       const c = st.calls.get(k) ?? { id: "", name: "", arguments: "" };
-      if (t.id !== undefined) {
+      if (t.id != null) {
         if (c.id && c.id !== t.id) throw new Error("conflicting subscription tool call id");
         c.id = text(t.id);
       }
-      if (t.function !== undefined) {
+      if (t.function != null) {
         const f = object(t.function);
-        if (f.name !== undefined) {
+        if (f.name != null) {
           if (c.name && c.name !== f.name) throw new Error("conflicting subscription tool name");
           if (!c.name) on("tool", text(f.name) + " ", true);
           c.name = text(f.name);
         }
-        if (f.arguments !== undefined) {
+        if (f.arguments != null) {
           const delta = text(f.arguments);
           c.arguments += delta;
           on("tool", delta);
@@ -202,9 +202,14 @@ function messages(st: State, ev: Obj, on: Emit): void {
   }
 }
 export function read(st: State, event: unknown, on: Emit): boolean {
-  if (st.done) return true;
+  if (st.done && (st.api !== "openai-completions" || st.error)) return true;
   try {
     const ev = object(event);
+    if (st.done) {
+      if (ev.error || !Array.isArray(ev.choices) || ev.choices.length) throw new Error("content after subscription completion");
+      if (ev.usage != null) st.usage = object(ev.usage);
+      return true;
+    }
     if (typeof ev.type !== "string" && st.api !== "openai-completions") throw new Error("invalid subscription event");
     if (st.api === "openai-responses") responses(st, ev, on);
     else if (st.api === "openai-completions") chat(st, ev, on);

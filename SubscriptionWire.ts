@@ -28,11 +28,18 @@ export namespace SubscriptionWire {
     return {
       key: vendor,
       auth: connection.auth,
-      idle: 1200e3,
+      idle: model.api === "anthropic-messages" ? 300e3 : 1200e3,
       get url() { return endpoint(); },
       headers: (key, _ask) => {
         endpoint();
         const headers: Record<string, string> = { authorization: "Bearer " + key, "content-type": "application/json" };
+        if (model.api === "anthropic-messages") {
+          headers["anthropic-version"] = "2023-06-01";
+          if (vendor === "opencode-go") {
+            delete headers.authorization;
+            headers["x-api-key"] = key;
+          }
+        }
         return headers;
       },
       body: (ask, items, tools, max) => {
@@ -45,7 +52,7 @@ export namespace SubscriptionWire {
       begun: (event) => {
         try {
           const ev = object(event);
-          return ev.type === "response.output_item.added";
+          return model.api === "openai-completions" ? Array.isArray(ev.choices) && ev.choices.length > 0 : ev.type === "message_start" || ev.type === "response.output_item.added";
         } catch { return false; }
       },
       step: Stream.step,

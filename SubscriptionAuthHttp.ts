@@ -57,7 +57,7 @@ export function lifetime(value: unknown, fallback: number, max: number): number 
 }
 export type LoginOptions = {
   show?: (url: string, code: string) => void; wait?: (ms: number, signal?: AbortSignal) => Promise<void>;
-  signal?: AbortSignal;
+  signal?: AbortSignal; key?: string;
 };
 export async function device(_vendor: SubscriptionVendor, url: string, tokenUrl: string, fields: Record<string, string>, options: LoginOptions): Promise<Body> {
   const started = success(await form(url, fields, options.signal));

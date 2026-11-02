@@ -1851,7 +1851,7 @@ var SubscriptionCatalog_default = {
   provenance: {
     pi: "b556cfe5b0300a91f39c7bc5369a65a25fb7fcd5",
     cells: "f5dcf452bcd08b4d877dbc59e60d0bfc43731d08",
-    note: "Public xAI catalog declarations only; no pricing or entitlement claim. Effort rosters follow pinned Pi getSupportedThinkingLevels restricted to low/medium/high/xhigh/max."
+    note: "Public xAI and OpenCode Go catalog declarations only; no pricing or entitlement claim. Effort rosters follow pinned Pi getSupportedThinkingLevels restricted to low/medium/high/xhigh/max."
   },
   models: {
     "xai-sub": [
@@ -1940,12 +1940,673 @@ var SubscriptionCatalog_default = {
           "high"
         ]
       }
+    ],
+    "opencode-go": [
+      {
+        label: "minimax-m3",
+        id: "minimax-m3",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 131072,
+        api: "anthropic-messages",
+        baseUrl: "https://opencode.ai/zen/go",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "medium"
+        ]
+      },
+      {
+        label: "deepseek-v4-flash",
+        id: "deepseek-v4-flash",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 384000,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "low",
+          "high",
+          "max"
+        ],
+        thinkingLevelMap: {
+          minimal: null,
+          low: "low",
+          medium: null,
+          high: "high",
+          max: "max"
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens",
+          requiresReasoningContentOnAssistantMessages: true,
+          thinkingFormat: "deepseek"
+        }
+      },
+      {
+        label: "deepseek-v4-flash-vision-exp",
+        id: "deepseek-v4-flash-vision-exp",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 384000,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "high",
+          "max"
+        ],
+        thinkingLevelMap: {
+          minimal: null,
+          low: "low",
+          medium: null,
+          high: "high",
+          max: "max"
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens",
+          requiresReasoningContentOnAssistantMessages: true,
+          thinkingFormat: "deepseek"
+        }
+      },
+      {
+        label: "deepseek-v4-pro",
+        id: "deepseek-v4-pro",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 384000,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "high",
+          "max"
+        ],
+        thinkingLevelMap: {
+          minimal: null,
+          low: null,
+          medium: null,
+          high: "high",
+          max: "max"
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens",
+          requiresReasoningContentOnAssistantMessages: true,
+          thinkingFormat: "deepseek"
+        }
+      },
+      {
+        label: "glm-5.1",
+        id: "glm-5.1",
+        speeds: [
+          "slow"
+        ],
+        window: 202752,
+        output: 32768,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "glm-5.2",
+        id: "glm-5.2",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 131072,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "high",
+          "max"
+        ],
+        thinkingLevelMap: {
+          off: null,
+          minimal: null,
+          low: null,
+          medium: null,
+          high: "high",
+          xhigh: null,
+          max: "max"
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "glm-5.3",
+        id: "glm-5.3",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 131072,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "low",
+          "high",
+          "max"
+        ],
+        thinkingLevelMap: {
+          off: null,
+          minimal: null,
+          low: "low",
+          medium: null,
+          high: "high",
+          xhigh: null,
+          max: "max"
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "hy3",
+        id: "hy3",
+        speeds: [
+          "slow"
+        ],
+        window: 256000,
+        output: 64000,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "low",
+          "high"
+        ],
+        thinkingLevelMap: {
+          off: "none",
+          minimal: null,
+          low: "low",
+          medium: null,
+          high: "high",
+          xhigh: null,
+          max: null
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "kimi-k2.6",
+        id: "kimi-k2.6",
+        speeds: [
+          "slow"
+        ],
+        window: 262144,
+        output: 65536,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "high"
+        ],
+        thinkingLevelMap: {
+          minimal: null,
+          low: null,
+          medium: null
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          thinkingFormat: "deepseek",
+          supportsReasoningEffort: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "kimi-k2.7-code",
+        id: "kimi-k2.7-code",
+        speeds: [
+          "slow"
+        ],
+        window: 262144,
+        output: 262144,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "kimi-k3",
+        id: "kimi-k3",
+        speeds: [
+          "slow"
+        ],
+        window: 1048576,
+        output: 131072,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "max"
+        ],
+        thinkingLevelMap: {
+          off: null,
+          minimal: null,
+          low: null,
+          medium: null,
+          high: null,
+          xhigh: null,
+          max: "max"
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "longcat-2.0",
+        id: "longcat-2.0",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 131072,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "mimo-v2.5",
+        id: "mimo-v2.5",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 128000,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "mimo-v2.5-pro",
+        id: "mimo-v2.5-pro",
+        speeds: [
+          "slow"
+        ],
+        window: 1048576,
+        output: 128000,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "minimax-m2.7",
+        id: "minimax-m2.7",
+        speeds: [
+          "slow"
+        ],
+        window: 204800,
+        output: 131072,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "ox-alpha-free",
+        id: "ox-alpha-free",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 131072,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "high",
+          "max"
+        ],
+        thinkingLevelMap: {
+          off: null,
+          minimal: null,
+          low: "low",
+          medium: null,
+          high: "high",
+          xhigh: null,
+          max: "max"
+        },
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "qwen3.6-plus",
+        id: "qwen3.6-plus",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 65536,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          thinkingFormat: "qwen",
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "qwen3.7-max",
+        id: "qwen3.7-max",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 65536,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "qwen3.7-plus",
+        id: "qwen3.7-plus",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 65536,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "qwen3.8-max",
+        id: "qwen3.8-max",
+        speeds: [
+          "slow"
+        ],
+        window: 1e6,
+        output: 131072,
+        api: "openai-completions",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "medium"
+        ],
+        compat: {
+          supportsStore: false,
+          supportsDeveloperRole: false,
+          maxTokensField: "max_tokens"
+        }
+      },
+      {
+        label: "gpt-5.6-luna",
+        id: "gpt-5.6-luna",
+        speeds: [
+          "slow"
+        ],
+        window: 1050000,
+        output: 128000,
+        api: "openai-responses",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "medium",
+          "high",
+          "xhigh",
+          "max"
+        ],
+        thinkingLevelMap: {
+          off: null,
+          minimal: null,
+          low: "low",
+          medium: "medium",
+          high: "high",
+          xhigh: "xhigh",
+          max: "max"
+        },
+        compat: {
+          sessionAffinityFormat: "openai-nosession"
+        }
+      },
+      {
+        label: "grok-4.6",
+        id: "grok-4.6",
+        speeds: [
+          "slow"
+        ],
+        window: 500000,
+        output: 500000,
+        api: "openai-responses",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        thinkingLevelMap: {
+          off: null,
+          minimal: null,
+          low: "low",
+          medium: "medium",
+          high: "high",
+          xhigh: "xhigh",
+          max: null
+        },
+        compat: {
+          sessionAffinityFormat: "openai-nosession"
+        }
+      },
+      {
+        label: "muse-spark-1.2-contributor",
+        id: "muse-spark-1.2-contributor",
+        speeds: [
+          "slow"
+        ],
+        window: 1048576,
+        output: 131072,
+        api: "openai-responses",
+        baseUrl: "https://opencode.ai/zen/go/v1",
+        reasoning: true,
+        input: [
+          "text",
+          "image"
+        ],
+        efforts: [
+          "low",
+          "medium",
+          "high",
+          "xhigh"
+        ],
+        thinkingLevelMap: {
+          off: null,
+          minimal: "minimal",
+          low: "low",
+          medium: "medium",
+          high: "high",
+          xhigh: "xhigh",
+          max: null
+        },
+        compat: {
+          sessionAffinityFormat: "openai-nosession"
+        }
+      }
     ]
   }
 };
 
 // SubscriptionModels.ts
-var SUBSCRIPTION_VENDORS = ["xai-sub"];
+var SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go"];
 var SubscriptionModels;
 ((SubscriptionModels) => {
   function isVendor(vendor) {
@@ -1978,7 +2639,8 @@ var MODELS = {
   "openai-api": OPENAI,
   "openai-sub": PLAN,
   "claude-sub": [{ ...OPUS, speeds: ["slow"] }, SONNET, HAIKU],
-  "xai-sub": SubscriptionModels.models("xai-sub")
+  "xai-sub": SubscriptionModels.models("xai-sub"),
+  "opencode-go": SubscriptionModels.models("opencode-go")
 };
 var EFFORTS = ["low", "medium", "high", "xhigh", "max"];
 var SPEEDS = ["slow", "fast", "ultrafast"];

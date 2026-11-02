@@ -89,12 +89,13 @@ export async function renew(old: Credential): Promise<Credential> {
   if (old.vendor === "copilot-sub") return copilotCredential(secret(old.refresh));
   throw new Denied();
 }
-export function usable(c: Credential): void {
-  secret(c.access);
+export function usable(c: Credential, allow_pending = false): void {
+  if (c.pending && (!allow_pending || c.vendor !== "copilot-sub")) throw new Denied();
+  if (!c.pending) secret(c.access);
   if (c.vendor === "copilot-sub") {
     copilotBase(c.endpoint);
     const catalog = new Set(SubscriptionModels.models(c.vendor).map(m => m.id));
-    if (!c.models?.length || c.models.some(m => !catalog.has(m))) throw new Denied();
+    if (!c.pending && (!c.models?.length || c.models.some(m => !catalog.has(m)))) throw new Denied();
   } else if (c.endpoint !== endpoint(c.vendor)) throw new Denied();
   if (c.vendor === "xai-sub") scope(c.scope);
   if (c.vendor !== "opencode-go") secret(c.refresh);

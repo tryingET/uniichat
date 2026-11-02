@@ -253,7 +253,7 @@ function control_html(r: Row, available?: Available): string {
       return checks_html("vendors", VENDORS, list(r.value), () => "") + `<p class="warn"></p>`;
     }
     case "models": {
-      return checks_html("models", LABELS, list(r.value), (x) => Pick.models(VENDORS, [x], available).map(([vendor]) => vendor).join(" "));
+      return checks_html("models", LABELS, list(r.value), (x) => Pick.models(VENDORS, [x], available).map(([vendor]) => vendor).join(" ") || "-");
     }
     case "pick":
     case "compactor":

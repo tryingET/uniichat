@@ -69,7 +69,7 @@ const DEFAULT_MODEL: Record<Vendor, string> = {
   "claude-api" : "sonnet-5.5",
   "openai-api" : "gpt-6.1-sol",
   "xai-sub": "grok-4.3", "opencode-go": "minimax-m3",
-  "copilot-sub": "gpt-6.1-sol",
+  "copilot-sub": "gpt-4.1",
 };
 
 const NONE     = "Not signed in and no API key: sign in with `unii serve claude login` (or `unii serve chatgpt login`) on the server, or set a key in Settings";

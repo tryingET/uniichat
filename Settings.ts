@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as config from "./Config.ts";
-import { LABELS, type Available } from "./Pick.ts";
+import { LABELS, Pick, type Available } from "./Pick.ts";
 import { write_whole } from "./Write.ts";
 import { err_code, err_why } from "./Err.ts";
 import { get, rec } from "./Json.ts";
@@ -226,7 +226,15 @@ export namespace Settings {
       return { error: unknown === "" ? "Offer at least one model." : "There is no model " + unknown + ".", key: "models" };
     }
     try {
-      config.config_make(file);
+      const made = config.config_make(file);
+      const current = { pick: config.PICK, compactor: config.COMPACTOR, agents: config.AGENTS };
+      for (const key of ["pick", "compactor", "agents"] as const) {
+        const pick = made[key], before = current[key];
+        const unchanged = pick !== null && before !== null && Pick.label(pick) === Pick.label(before) && pick.profile === before.profile;
+        if (changed.has(key) && pick !== null && !unchanged && Pick.read(pick, made.offer) === null) {
+          return { error: "That model is no longer available to this account; pick another.", key };
+        }
+      }
     } catch (err) {
       const text = err_why(err).replace(/^config: /, "");
       const key = text.startsWith("profile") ? "profiles" : config.SETTINGS.find((s) => text.startsWith(s.key + " "))?.key;

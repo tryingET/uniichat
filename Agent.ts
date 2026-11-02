@@ -73,6 +73,7 @@ export type Wire<S, E> = {
   reject? : (res: Response, body: string, truncated?: boolean) => Step;
   refusal?: (res: Response, body: string) => Refusal | null;
   reset?  : (res: Response, body: string) => number | null;
+  drain?  : boolean;
   idle    : number;
   url     : string;
   headers : (key: string, ask: Ask) => Record<string, string>;
@@ -463,8 +464,10 @@ export namespace Agent {
         run.on({ $: "Delta", kind, text, fresh });
       }
     };
+    let complete: Step | undefined;
     try {
-      for await (const data of Agent.events(body)) {
+      for await (const data of Agent.events(body, wire.drain)) {
+        if (data === "[DONE]") return complete ?? wire.step(st, ask);
         const ev = JSON.parse(data) as E;
         timer.refresh();
         if (wire.begun(ev)) {
@@ -472,10 +475,14 @@ export namespace Agent {
         }
         if (wire.read(st, ev, on)) {
           const step = wire.step(st, ask);
+          if (wire.drain && (step.stop === "done" || step.stop === "tools")) {
+            complete = step;
+            continue;
+          }
           return step.stop === "fail" || step.stop === "busy" || step.stop === "limit" ? Agent.fail(step.why, seen, step.stop) : step;
         }
       }
-      return Agent.fail("the stream ended early", seen, "busy");
+      return complete ?? Agent.fail("the stream ended early", seen, "busy");
     } catch (err) {
       return Agent.fail(err_why(err), seen, "busy");
     }
@@ -493,12 +500,20 @@ export namespace Agent {
     return { out: [], uses: [], entries, stop, why, note: "" };
   }
 
-  export async function* events(stream: ReadableStream<Uint8Array>) {
-    for await (const line of AskAI.lines(stream)) {
-      if (line.startsWith("data:") && line.slice(5).trim() !== "[DONE]") {
-        yield line.slice(5);
+  export async function* events(stream: ReadableStream<Uint8Array>, keep_done = false) {
+    const utf8 = new TextDecoder();
+    let rest = "";
+    const data = (line: string) => line.trim().startsWith("data:") ? line.trim().slice(5).trim() : "";
+    for await (const chunk of stream) {
+      const lines = (rest + utf8.decode(chunk, { stream: true })).split("\n");
+      rest = lines.pop() ?? "";
+      for (const line of lines) {
+        const event = data(line);
+        if (event && (keep_done || event !== "[DONE]")) yield event;
       }
     }
+    const event = data(rest + utf8.decode());
+    if (event && (keep_done || event !== "[DONE]")) yield event;
   }
 
   export function parse(json: string): unknown {

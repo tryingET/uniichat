@@ -28,6 +28,7 @@ export namespace SubscriptionWire {
     return {
       key: vendor,
       auth: connection.auth,
+      drain: model.api === "openai-completions",
       idle: model.api === "anthropic-messages" ? 300e3 : 1200e3,
       get url() { return endpoint(); },
       headers: (key, _ask) => {

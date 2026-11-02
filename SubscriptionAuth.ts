@@ -26,8 +26,8 @@ export namespace SubscriptionAuth {
     check(vendor);
     try {
       const c = load(dir, vendor);
-      if (!c || c.pending || c.blocked) return { connected: false };
-      usable(c);
+      if (!c || c.blocked) return { connected: false };
+      usable(c, true);
       return { connected: true, endpoint: c.endpoint };
     } catch { return { connected: false }; }
   }

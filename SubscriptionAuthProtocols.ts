@@ -48,8 +48,9 @@ export async function renew(old: Credential): Promise<Credential> {
   })), old);
   return museCredential(secret(old.refresh));
 }
-export function usable(c: Credential): void {
-  secret(c.access);
+export function usable(c: Credential, allow_pending = false): void {
+  if (c.pending && (!allow_pending || c.vendor === "xai-sub")) throw new Denied();
+  if (!c.pending) secret(c.access);
   if (c.endpoint !== endpoint(c.vendor)) throw new Denied();
   if (c.vendor === "xai-sub") scope(c.scope);
   secret(c.refresh);

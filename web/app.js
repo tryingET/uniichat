@@ -2921,6 +2921,14 @@ var SPEEDS = ["slow", "fast", "ultrafast"];
 var LABELS = [...new Set(Object.values(MODELS).flat().map((m) => m.label))];
 var Pick;
 ((Pick2) => {
+  function learn(roster) {
+    for (const v of SUBSCRIPTION_VENDORS) {
+      const live = roster[v] ?? [];
+      MODELS[v] = [...live, ...SubscriptionPicks.models(v).filter((m) => !live.some((l) => l.label === m.label))];
+    }
+    LABELS.splice(0, LABELS.length, ...new Set(Object.values(MODELS).flat().map((m) => m.label)));
+  }
+  Pick2.learn = learn;
   function model(vendor, label) {
     return MODELS[vendor].find((m) => m.label === label);
   }
@@ -2937,7 +2945,7 @@ var Pick;
   }
   Pick2.efforts = efforts;
   function allowed(vendor, model, available) {
-    return vendor !== "copilot-sub" || (available?.[vendor]?.includes(model.id) ?? false);
+    return !SubscriptionPicks.isVendor(vendor) || (available?.[vendor]?.includes(model.id) ?? vendor !== "copilot-sub");
   }
   Pick2.allowed = allowed;
   function models(vendors, labels, available) {
@@ -3193,6 +3201,7 @@ function view_hear(v, msg) {
     case "state": {
       const { $, ...state } = msg;
       Object.assign(v, state);
+      Pick.learn(v.roster ?? {});
       for (const page of v.pages.values()) {
         page.pick = v.runs[page.name] ?? page.pick;
       }
@@ -4313,6 +4322,7 @@ var GROUPS = [
   ["Server", ["site", "apple", "apns"]]
 ];
 function settings_html(page) {
+  Pick.learn(page.roster ?? {});
   const rows = new Map(page.settings.filter((r) => r.web && r.from !== "env").map((r) => [r.key, r]));
   const group = ([title, keys]) => {
     const shown = keys.flatMap((k) => rows.get(k) ?? []);

@@ -15,7 +15,7 @@ export type Move = "next" | "prev" | "model" | "up" | "down" | "effort" | "speed
 export type Model = { label: string; id: string; speeds: string[]; window: number; efforts?: string[] };
 
 export type Available = Partial<Record<Vendor, string[]>>;
-export type Offer = { vendors: Vendor[]; models: string[]; profiles?: Record<string, Fall[]>; available?: Available };
+export type Offer = { vendors: Vendor[]; models: string[]; profiles?: Record<string, Fall[]>; available?: Available; roster?: Roster };
 
 export type Fall = { vendor: Vendor; model: Model; effort?: string; speed?: string };
 
@@ -52,9 +52,20 @@ export const EFFORTS = ["low", "medium", "high", "xhigh", "max"];
 
 const SPEEDS = ["slow", "fast", "ultrafast"];
 
+export type Roster = Partial<Record<Vendor, Model[]>>;
+
 export const LABELS = [...new Set(Object.values(MODELS).flat().map((m) => m.label))];
 
 export namespace Pick {
+
+  // A provider's reported models first, then the catalog's it no longer lists, so saved picks still resolve.
+  export function learn(roster: Roster): void {
+    for (const v of SUBSCRIPTION_VENDORS) {
+      const live = roster[v] ?? [];
+      MODELS[v] = [...live, ...SubscriptionPicks.models(v).filter((m) => !live.some((l) => l.label === m.label))];
+    }
+    LABELS.splice(0, LABELS.length, ...new Set(Object.values(MODELS).flat().map((m) => m.label)));
+  }
 
   export function model(vendor: Vendor, label: string): Model | undefined {
     return MODELS[vendor].find((m) => m.label === label);
@@ -70,7 +81,7 @@ export namespace Pick {
   export function efforts(model?: Model): string[] { return model?.efforts ?? EFFORTS; }
 
   export function allowed(vendor: Vendor, model: Model, available?: Available): boolean {
-    return vendor !== "copilot-sub" || (available?.[vendor]?.includes(model.id) ?? false);
+    return !SubscriptionPicks.isVendor(vendor) || (available?.[vendor]?.includes(model.id) ?? vendor !== "copilot-sub");
   }
 
   export function models(vendors: Vendor[], labels: string[], available?: Available): Array<[Vendor, Model]> {

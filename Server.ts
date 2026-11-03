@@ -25,6 +25,7 @@ import * as Timer from "./Timer.ts";
 import { PROMPTS, SEARCHES, Tools } from "./Tools.ts";
 import { ACTIVE, FRAME, IDLE, IMAGES, live_push, MEDIA, PING, QUIT, SUMMARIES, TICK, TURN, WIRE, type Answer, type Live, type Part, type Pending, type Queued, type Server as Out, type Sums, type Talk as Meter, TOKEN, type Wait } from "./View.ts";
 import * as config from "./Config.ts";
+import { SubscriptionRoster } from "./SubscriptionRoster.ts";
 import { err_code, err_stack, err_why } from "./Err.ts";
 import { get, rec, text_of } from "./Json.ts";
 import hello_md from "./hello.md" with { type: "text" };
@@ -1849,6 +1850,7 @@ export namespace Main {
     if (config.config_follow()) {
       Chat.offer(Main.chat);
     }
+    void SubscriptionRoster.tend(config.DIR).then((wrote) => wrote && Main.follow());
   }
 
   export function unowned(err: unknown): void {

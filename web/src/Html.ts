@@ -205,6 +205,7 @@ const GROUPS: Array<[string, string[]]> = [
 ];
 
 export function settings_html(page: Page): string {
+  Pick.learn(page.roster ?? {});
   const rows = new Map(page.settings.filter((r) => r.web && r.from !== "env").map((r) => [r.key, r]));
   const group = ([title, keys]: [string, string[]]) => {
     const shown = keys.flatMap((k) => rows.get(k) ?? []);

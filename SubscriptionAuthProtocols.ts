@@ -1,4 +1,4 @@
-import { COPILOT_IDENTITY, SubscriptionModels, type SubscriptionVendor } from "./SubscriptionModels.ts";
+import { COPILOT_IDENTITY, type SubscriptionVendor } from "./SubscriptionModels.ts";
 import { secret, type Credential } from "./SubscriptionAuthStore.ts";
 import { copilotBase, Denied, device, form, lifetime, request, success, type Body, type LoginOptions } from "./SubscriptionAuthHttp.ts";
 
@@ -28,15 +28,13 @@ function xaiCredential(body: Body, previous?: Credential): Credential {
 }
 function entitledModels(raw: Body, base: string): string[] {
   if (!Array.isArray(raw.data)) throw new Denied();
-  const catalog = new Set(SubscriptionModels.models("copilot-sub").map(m => m.id));
-  const rows = raw.data.filter((v): v is Body => !!v && typeof v === "object" && !Array.isArray(v));
-  const enabled = (row: Body) => (row.policy as Body | undefined)?.state === "enabled";
-  // Match Pi's Individual-only enabled-policy fallback, never unconfigured policy.
-  const hasPicker = rows.some(row => row.model_picker_enabled === true && enabled(row));
-  const ids = rows.filter(row => enabled(row) && (row.model_picker_enabled === true ||
-      (!hasPicker && base === "https://api.individual.githubcopilot.com")) &&
-      ((row.capabilities as Body | undefined)?.supports as Body | undefined)?.tool_calls !== false &&
-      typeof row.id === "string" && catalog.has(row.id)).map(row => row.id as string);
+  const rows = raw.data.filter((v): v is Body => !!v && typeof v === "object" && !Array.isArray(v)).filter(row => typeof row.id === "string" &&
+      ((row.capabilities as Body | undefined)?.supports as Body | undefined)?.tool_calls !== false);
+  const state = (row: Body) => (row.policy as Body | undefined)?.state;
+  // Match Pi: picker models not disabled, else (Individual only) the enabled-policy fallback.
+  const picked = rows.filter(row => row.model_picker_enabled === true && state(row) !== "disabled");
+  const ids = (picked.length > 0 || base !== "https://api.individual.githubcopilot.com" ? picked : rows.filter(row => state(row) === "enabled"))
+      .map(row => row.id as string);
   if (!ids.length) throw new Denied();
   return [...new Set(ids)];
 }
@@ -90,8 +88,7 @@ export function usable(c: Credential, allow_pending = false): void {
   if (!c.pending) secret(c.access);
   if (c.vendor === "copilot-sub") {
     copilotBase(c.endpoint);
-    const catalog = new Set(SubscriptionModels.models(c.vendor).map(m => m.id));
-    if (!c.pending && (!c.models?.length || c.models.some(m => !catalog.has(m)))) throw new Denied();
+    if (!c.pending && !c.models?.length) throw new Denied();
   } else if (c.endpoint !== endpoint(c.vendor)) throw new Denied();
   if (c.vendor === "xai-sub") scope(c.scope);
   if (c.vendor !== "opencode-go") secret(c.refresh);

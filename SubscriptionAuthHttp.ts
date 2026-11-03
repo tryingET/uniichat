@@ -25,6 +25,7 @@ const AUTH_URLS = new Set([
   "https://auth.x.ai/oauth2/device/code", "https://auth.x.ai/oauth2/token",
   "https://github.com/login/device/code",
   "https://github.com/login/oauth/access_token", "https://api.github.com/copilot_internal/v2/token",
+  "https://api.x.ai/v1/models", "https://api.x.ai/v1/language-models", "https://opencode.ai/zen/go/v1/models",
 ]);
 function allowed(url: string): boolean {
   if (AUTH_URLS.has(url)) return true;

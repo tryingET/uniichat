@@ -1,7 +1,7 @@
 import type { Again, Kind, Parked, Vendor } from "./AskAI.ts";
 import * as Call from "./Call.ts";
 import * as Md from "./Md.ts";
-import { LABELS, type Available, type Fall, type Move, Pick } from "./Pick.ts";
+import { LABELS, type Available, type Fall, type Move, Pick, type Roster } from "./Pick.ts";
 import { GLYPH, WHO } from "./Theme.ts";
 import type { Timer } from "./Timer.ts";
 import type { Job } from "./Machine.ts";
@@ -60,6 +60,7 @@ type Offered = {
   models    : string[];
   profiles? : Record<string, Fall[]>;
   available?: Available;
+  roster?   : Roster;
 };
 
 type ChatSet = {
@@ -339,6 +340,7 @@ export function view_hear(v: View, msg: Server): Client[] {
     case "state": {
       const { $, ...state } = msg;
       Object.assign(v, state);
+      Pick.learn(v.roster ?? {});
       for (const page of v.pages.values()) {
         page.pick = v.runs[page.name] ?? page.pick;
       }

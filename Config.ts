@@ -5,7 +5,9 @@ import * as path from "node:path";
 import type { Vendor } from "./AskAI.ts";
 import { err_code, err_why } from "./Err.ts";
 import { get, list as items, rec, text_of } from "./Json.ts";
-import { LABELS, VENDORS, Pick, type Fall, type Offer } from "./Pick.ts";
+import { LABELS, VENDORS, Pick, type Fall, type Offer, type Roster } from "./Pick.ts";
+import { SubscriptionRoster } from "./SubscriptionRoster.ts";
+import { SUBSCRIPTION_VENDORS } from "./SubscriptionPicks.ts";
 import { SubscriptionAuth } from "./SubscriptionAuth.ts";
 import { SubscriptionModels } from "./SubscriptionModels.ts";
 
@@ -43,7 +45,7 @@ export const KEYS_PATH = DIR + "/keys.json";
 
 export const SETTINGS: Setting[] = [
   { key: "vendors",   def: "claude-api",                        apply: "now",     server_only: null },
-  { key: "models",    def: LABELS.join(),                       apply: "now",     server_only: null },
+  { key: "models",    get def() { return LABELS.join(); },      apply: "now",     server_only: null },
   { key: "pick",      def: "claude-api:sonnet-5.5:medium:slow", apply: "now",     server_only: null },
   { key: "compactor", def: "claude-api:sonnet-5.5:medium:slow", apply: "now",     server_only: null },
   { key: "compactor_context", def: "4",                         apply: "now",     server_only: null },
@@ -300,16 +302,39 @@ function config_json(file: string, text: string): unknown {
   }
 }
 
+export function config_roster(): Roster {
+  const roster: Roster = {};
+  for (const v of SUBSCRIPTION_VENDORS) {
+    const list = SubscriptionRoster.read(DIR, v);
+    SubscriptionModels.learn(v, list);
+    roster[v] = (list ?? []).map(({ label, id, speeds, window, efforts }) => ({ label, id, speeds, window, efforts }));
+  }
+  Pick.learn(roster);
+  return roster;
+}
+
 export function config_available(): NonNullable<Offer["available"]> {
-  const status = SubscriptionAuth.status(DIR, "copilot-sub");
-  return { "copilot-sub": status.connected ? status.models ?? [] : [] };
+  config_roster();
+  const available: NonNullable<Offer["available"]> = {};
+  for (const v of SUBSCRIPTION_VENDORS) {
+    const status = SubscriptionAuth.status(DIR, v);
+    const ids = SubscriptionModels.models(v).map((m) => m.id);
+    if (v === "copilot-sub") {
+      available[v] = status.connected ? (status.models ?? []).filter((id) => ids.includes(id)) : [];
+    } else if (status.connected) {
+      available[v] = ids;
+    }
+  }
+  return available;
 }
 
 export function config_make(file: Record<string, unknown>): Made {
+  const available = config_available();
   const offer: Offer = {
     vendors : config_vendors(config_value(file, "vendors")),
     models  : config_value(file, "models").split(",").map((m) => m.trim()),
-    available: config_available(),
+    available,
+    roster  : config_roster(),
   };
   offer.profiles = config_profiles(file, offer);
   const agents = config_value(file, "agents");
@@ -470,6 +495,7 @@ export function config_reload(): void {
   OFFER.vendors = made.offer.vendors;
   OFFER.models = made.offer.models;
   OFFER.available = made.offer.available;
+  OFFER.roster = made.offer.roster;
   OFFER.profiles = made.offer.profiles;
   PICK = made.pick;
   COMPACTOR = made.compactor;

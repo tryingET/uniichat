@@ -1,7 +1,7 @@
 import type { SubscriptionVendor } from "./SubscriptionModels.ts";
 import { SubscriptionModels } from "./SubscriptionModels.ts";
 import { forget, load, locked, save, secret, type Credential } from "./SubscriptionAuthStore.ts";
-import { Denied, type LoginOptions } from "./SubscriptionAuthHttp.ts";
+import { Denied, Transient, type LoginOptions } from "./SubscriptionAuthHttp.ts";
 import { initial, renew, usable } from "./SubscriptionAuthProtocols.ts";
 
 function check(vendor: SubscriptionVendor): void {
@@ -87,7 +87,7 @@ export namespace SubscriptionAuth {
       if (vendor === "opencode-go") throw new Denied();
       // Clear access/models before dispatch. Crash, timeout, invalid JSON or an
       // uncertain response leaves this durable marker; NEVER replay that refresh.
-      // Nonrotating identity remints (Muse, Copilot) can safely retry this unavailable state.
+      // Nonrotating identity remints can safely retry this unavailable state.
       save(dir, vendor, { ...old, access: "", models: undefined, pending: true });
       try {
         const next = await renew(old);
@@ -98,6 +98,7 @@ export namespace SubscriptionAuth {
         return next;
       } catch (error) {
         if (error instanceof Denied) forget(dir, vendor);
+        if (error instanceof Transient) save(dir, vendor, old);
         throw error;
       }
     }, signal);

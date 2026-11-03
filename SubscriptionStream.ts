@@ -16,6 +16,17 @@ export type State = {
 export function start(api: SubscriptionApi, allowed: Set<string>): State {
   return { api, allowed, done: false, error: "", finish: "", blocks: new Map(), open: new Set(), json: new Map(), calls: new Map(), message: { role: "assistant", content: "" }, output: null, responseCalls: new Set(), usage: null };
 }
+// the provider's own message, else the start of its body, without any bearer token it echoes
+export function said(message: unknown, body: string): string {
+  const text = typeof message === "string" && message !== "" ? message : body;
+  return text.slice(0, 2000).replace(/Bearer\s+\S+/gi, "Bearer [redacted]");
+}
+class Failed extends Error {}
+function failed(body: Obj): Error {
+  const error = typeof body.error === "object" && body.error !== null ? body.error as Obj : body;
+  const message = typeof body.error === "string" ? body.error : error.message;
+  return typeof message === "string" && message.trim() ? new Failed("Subscription provider error: " + said(message, "")) : new Error("subscription response incomplete or failed");
+}
 function fail(why: string): Step {
   // Native memory treats `fail` as a compressible context failure and clips it.
   // Protocol/auth/service failures must instead wait/stop, never create a summary.
@@ -72,12 +83,12 @@ function responses(st: State, ev: Obj, on: Emit): void {
         st.done = true;
         break;
       }
-      throw new Error("subscription response incomplete or failed");
+      throw failed(body);
     }
   }
 }
 function chat(st: State, ev: Obj, on: Emit): void {
-  if (ev.error) throw new Error("subscription stream error");
+  if (ev.error) throw failed(ev);
   if (ev.usage != null) st.usage = object(ev.usage);
   if (!Array.isArray(ev.choices)) throw new Error("invalid subscription completion choices");
   if (!ev.choices.length) return; // Usage-only chunk.
@@ -187,7 +198,7 @@ function messages(st: State, ev: Obj, on: Emit): void {
       break;
     }
     case "message_stop": st.done = true; break;
-    case "error": throw new Error("subscription stream error");
+    case "error": throw failed(ev);
   }
 }
 export function read(st: State, event: unknown, on: Emit): boolean {
@@ -203,10 +214,10 @@ export function read(st: State, event: unknown, on: Emit): boolean {
     if (st.api === "openai-responses") responses(st, ev, on);
     else if (st.api === "openai-completions") chat(st, ev, on);
     else messages(st, ev, on);
-  } catch {
-    // Never leak server-provided error bodies, opaque reasoning, arguments or
-    // a credential echoed by the server into error messages/logs.
-    st.error = "invalid, incomplete or unsupported subscription stream";
+  } catch (error) {
+    // Only a provider's own error message, bearer redacted; never opaque
+    // reasoning, arguments or bodies of malformed events.
+    st.error = error instanceof Failed ? error.message : "invalid, incomplete or unsupported subscription stream";
     st.done = true;
   }
   return st.done;

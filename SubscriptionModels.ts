@@ -1,23 +1,25 @@
 // Public capability snapshots, not account entitlement or a billing guarantee.
 // Sources and generation provenance are recorded in SubscriptionCatalog.json.
 import catalog from "./SubscriptionCatalog.json";
+import { SubscriptionPicks, type SubscriptionVendor } from "./SubscriptionPicks.ts";
+import { VERSION } from "./Update.ts";
 
-export const SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go", "muse-sub", "copilot-sub"] as const;
-export type SubscriptionVendor = (typeof SUBSCRIPTION_VENDORS)[number];
+export { SUBSCRIPTION_VENDORS, type SubscriptionVendor } from "./SubscriptionPicks.ts";
 export type SubscriptionApi = "openai-responses" | "openai-completions" | "anthropic-messages";
 export type SubscriptionModel = {
   label: string; id: string; speeds: string[]; window: number; output: number;
   api: SubscriptionApi; baseUrl: string; reasoning: boolean; input: string[];
   efforts: string[]; thinkingLevelMap?: Record<string, string | number | null>;
-  compat?: Record<string, unknown>; headers?: Record<string, string>;
+  compat?: Record<string, unknown>;
 };
 
+export const COPILOT_IDENTITY = { "User-Agent": "unii/" + VERSION, "Editor-Version": "unii/" + VERSION };
+
 export namespace SubscriptionModels {
-  export function isVendor(vendor: string): vendor is SubscriptionVendor {
-    return (SUBSCRIPTION_VENDORS as readonly string[]).includes(vendor);
-  }
+  export const isVendor = SubscriptionPicks.isVendor;
   export function models(vendor: SubscriptionVendor): SubscriptionModel[] {
-    return catalog.models[vendor] as SubscriptionModel[];
+    const wire: Record<string, unknown> = catalog.models[vendor];
+    return SubscriptionPicks.models(vendor).map((m) => ({ ...m, ...(wire[m.label] as object) }) as SubscriptionModel);
   }
   export function model(vendor: SubscriptionVendor, label: string): SubscriptionModel | undefined {
     return models(vendor).find((m) => m.label === label);

@@ -1,8 +1,9 @@
 // Native subscription inference. No SDK, auth store, config, fetch,
 // service setup, or HTTP calls here. Chat and compaction use the same Wire.
 import type { Ask } from "./AskAI.ts";
+import { VERSION } from "./Update.ts";
 import type { Step, Wire } from "./Agent.ts";
-import type { SubscriptionModel } from "./SubscriptionModels.ts";
+import { COPILOT_IDENTITY, type SubscriptionModel } from "./SubscriptionModels.ts";
 import { destination, hasImages, object, request, vendorOf } from "./SubscriptionRequest.ts";
 import * as Stream from "./SubscriptionStream.ts";
 
@@ -12,12 +13,6 @@ type Connection = {
   endpoint: () => string;
 };
 type NativeWire = Wire<State, unknown> & { auth: Connection["auth"]; reject: (res: Response, body: string, truncated?: boolean) => Step };
-
-// the provider's own message, else the start of its body, without any bearer token it echoes
-function said(message: unknown, body: string): string {
-  const text = typeof message === "string" && message !== "" ? message : body;
-  return text.slice(0, 2000).replace(/Bearer\s+\S+/gi, "Bearer [redacted]");
-}
 
 export namespace SubscriptionWire {
   export function wire(model: SubscriptionModel, connection: Connection): NativeWire {
@@ -36,6 +31,10 @@ export namespace SubscriptionWire {
       headers: (key, ask) => {
         endpoint();
         const headers: Record<string, string> = { authorization: "Bearer " + key, "content-type": "application/json" };
+        if (vendor === "opencode-go") {
+          headers["user-agent"] = "unii/" + VERSION;
+          headers["x-opencode-session"] = "unii-" + Bun.hash(JSON.stringify([ask.agent === true ? "sub" : ask.who ?? "main", ask.model, ask.system])).toString(36);
+        }
         if (model.api === "anthropic-messages") {
           headers["anthropic-version"] = "2023-06-01";
           if (vendor === "opencode-go") {
@@ -44,24 +43,18 @@ export namespace SubscriptionWire {
           }
         }
         if (vendor === "copilot-sub") {
-          // Only catalog editor identity headers, never arbitrary auth/host headers.
-          for (const name of ["User-Agent", "Editor-Version", "Editor-Plugin-Version", "Copilot-Integration-Id"]) {
-            const value = model.headers?.[name];
-            if (!value) throw new Error("missing Copilot editor identity");
-            headers[name] = value;
-          }
+          Object.assign(headers, COPILOT_IDENTITY);
           const ctx = contexts.get(ask);
           if (!ctx) throw new Error("Copilot headers require a prepared request");
           headers["X-Initiator"] = ctx.initiator;
           headers["Openai-Intent"] = "conversation-edits";
           if (ctx.vision) headers["Copilot-Vision-Request"] = "true";
         }
-        if (vendor === "muse-sub") headers["x-api-version"] = "1.0.0";
         return headers;
       },
       body: (ask, items, tools, max) => {
         const body = request(model, vendor, ask, items, tools, max);
-        contexts.set(ask, { allowed: new Set(tools.map((t) => t.name)), initiator: items.at(-1)?.$ === "User" ? "user" : "agent", vision: hasImages(items) });
+        contexts.set(ask, { allowed: new Set(tools.map((t) => t.name)), initiator: items.at(-1)?.$ === "Back" ? "agent" : "user", vision: hasImages(items) });
         return body;
       },
       start: (ask) => Stream.start(model.api, contexts.get(ask)?.allowed ?? new Set()),
@@ -90,7 +83,7 @@ export namespace SubscriptionWire {
           out: [], uses: [], entries: [], note: "",
           stop: truncated ? "down" : context ? "fail" : spent ? "down" : res.status === 429 ? "limit" : [408, 409].includes(res.status) || res.status >= 500 ? "busy" : "down",
           off: truncated || spent || [401, 402, 403, 404].includes(res.status),
-          why: truncated ? "HTTP " + res.status + ": error body exceeded the local response limit" : (context ? "Subscription context window exceeded: " : "HTTP " + res.status + ": ") + said(message, body),
+          why: truncated ? "HTTP " + res.status + ": error body exceeded the local response limit" : (context ? "Subscription context window exceeded: " : "HTTP " + res.status + ": ") + Stream.said(message, body),
         };
       },
     };

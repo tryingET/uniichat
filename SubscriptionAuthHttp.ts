@@ -6,6 +6,7 @@ export type Body = Record<string, unknown>;
 export class Denied extends Error {
   constructor() { super("Subscription permission missing, removed, or expired; log in again"); }
 }
+export class Transient extends Error {}
 const COPILOT_HOSTS = new Set([
   "api.githubcopilot.com", "api.individual.githubcopilot.com",
   "api.business.githubcopilot.com", "api.enterprise.githubcopilot.com",
@@ -24,8 +25,6 @@ const AUTH_URLS = new Set([
   "https://auth.x.ai/oauth2/device/code", "https://auth.x.ai/oauth2/token",
   "https://github.com/login/device/code",
   "https://github.com/login/oauth/access_token", "https://api.github.com/copilot_internal/v2/token",
-  "https://auth.meta.com/oidc/device/authorization/", "https://auth.meta.com/oidc/device/token/",
-  "https://api.meta.ai/muse-code/key",
 ]);
 function allowed(url: string): boolean {
   if (AUTH_URLS.has(url)) return true;
@@ -36,7 +35,9 @@ export async function request(url: string, init: RequestInit, signal?: AbortSign
   const timeout = AbortSignal.timeout(30_000);
   const bounded = signal ? AbortSignal.any([signal, timeout]) : timeout;
   try {
-    const res = await fetch(url, { ...init, redirect: "error", signal: bounded });
+    const res = await fetch(url, { ...init, redirect: "error", signal: bounded }).catch((error: unknown) => {
+      throw bounded.aborted ? error : new Transient("Subscription sign-in service unreachable; try again later");
+    });
     const reader = res.body?.getReader();
     const chunks: Uint8Array[] = [];
     let size = 0;
@@ -52,12 +53,13 @@ export async function request(url: string, init: RequestInit, signal?: AbortSign
       } finally { reader.releaseLock(); }
     }
     if (res.status === 401 || res.status === 403) throw new Denied();
+    if (res.status === 429 || res.status >= 500) throw new Transient("Subscription sign-in service unavailable (HTTP " + res.status + "); try again later");
     let body: unknown;
     try { body = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { throw new Error(); }
     if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error();
     return { body: body as Body, ok: res.ok, status: res.status };
   } catch (error) {
-    if (error instanceof Denied) throw error;
+    if (error instanceof Denied || error instanceof Transient) throw error;
     // Never surface fetch errors, statusText, URLs from responses, or provider bodies.
     throw new Error("Subscription auth request failed (network, timeout, redirect, or malformed response)");
   }
@@ -86,8 +88,7 @@ export async function device(vendor: SubscriptionVendor, url: string, tokenUrl: 
   const deviceCode = secret(started.device_code);
   const userCode = started.user_code;
   if (typeof userCode !== "string" || !/^[A-Za-z0-9-]{1,64}$/.test(userCode)) throw new Error("Invalid device user code");
-  const hosts = vendor === "xai-sub" ? ["auth.x.ai", "accounts.x.ai", "x.ai"]
-    : vendor === "muse-sub" ? ["auth.meta.com", "meta.ai", "www.meta.ai", "www.meta.com"] : ["github.com"];
+  const hosts = vendor === "xai-sub" ? ["auth.x.ai", "accounts.x.ai", "x.ai"] : ["github.com"];
   let verification: URL;
   try { verification = new URL(String(started.verification_uri)); } catch { throw new Error("Untrusted device verification URL"); }
   if (verification.protocol !== "https:" || verification.username || verification.password || verification.port ||

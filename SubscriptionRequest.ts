@@ -31,7 +31,6 @@ export function destination(model: SubscriptionModel, vendor: SubscriptionVendor
   const clean = base.replace(/\/$/, "");
   const allowed = vendor === "copilot-sub" ? COPILOT.map((h) => "https://" + h)
     : vendor === "opencode-go" ? ["https://opencode.ai/zen/go", "https://opencode.ai/zen/go/v1"]
-    : vendor === "muse-sub" ? ["https://api.meta.ai/v1"]
     : ["https://api.x.ai/v1"];
   if (!allowed.includes(clean)) throw new Error("unsafe subscription inference endpoint");
   const root = vendor === "opencode-go" ? "https://opencode.ai/zen/go" + (model.api === "anthropic-messages" ? "" : "/v1") : clean;

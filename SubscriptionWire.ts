@@ -1,4 +1,5 @@
 import type { Ask } from "./AskAI.ts";
+import { VERSION } from "./Update.ts";
 import type { Step, Wire } from "./Agent.ts";
 import type { SubscriptionModel } from "./SubscriptionModels.ts";
 import { destination, object, request, vendorOf } from "./SubscriptionRequest.ts";
@@ -25,9 +26,13 @@ export namespace SubscriptionWire {
       drain: model.api === "openai-completions",
       idle: model.api === "anthropic-messages" ? 300e3 : 1200e3,
       get url() { return endpoint(); },
-      headers: (key, _ask) => {
+      headers: (key, ask) => {
         endpoint();
         const headers: Record<string, string> = { authorization: "Bearer " + key, "content-type": "application/json" };
+        if (vendor === "opencode-go") {
+          headers["user-agent"] = "unii/" + VERSION;
+          headers["x-opencode-session"] = "unii-" + Bun.hash(JSON.stringify([ask.agent === true ? "sub" : ask.who ?? "main", ask.model, ask.system])).toString(36);
+        }
         if (model.api === "anthropic-messages") {
           headers["anthropic-version"] = "2023-06-01";
           if (vendor === "opencode-go") {

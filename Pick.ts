@@ -46,6 +46,7 @@ const MODELS: Record<Vendor, Model[]> = {
   "xai-sub": SubscriptionPicks.models("xai-sub"),
   "opencode-go": SubscriptionPicks.models("opencode-go"),
   "copilot-sub": SubscriptionPicks.models("copilot-sub"),
+  "openrouter": SubscriptionPicks.models("openrouter"),
 };
 
 export const EFFORTS = ["low", "medium", "high", "xhigh", "max"];

@@ -20,14 +20,17 @@ export async function login(dir: string, vendor: SubscriptionVendor, options: Lo
     save(dir, vendor, credential);
   }, options.signal);
 }
-async function keyFromStdin(signal?: AbortSignal): Promise<string> {
+async function keyFromStdin(vendor: SubscriptionVendor, signal?: AbortSignal): Promise<string> {
   cancelled(signal);
-  // Dedicated env ONLY; never OPENAI_API_KEY, OPENCODE_API_KEY, or shared stores.
-  if (process.env.UNII_OPENCODE_GO_KEY !== undefined) return secret(process.env.UNII_OPENCODE_GO_KEY);
+  const go = vendor === "opencode-go";
+  const name = go ? "dedicated Go key" : "OpenRouter key";
+  // Dedicated env ONLY; never OPENAI_API_KEY, OPENCODE_API_KEY, OPENROUTER_API_KEY, or shared stores.
+  const env = process.env[go ? "UNII_OPENCODE_GO_KEY" : "UNII_OPENROUTER_KEY"];
+  if (env !== undefined) return secret(env);
   const input = process.stdin;
   const raw = input.isTTY ? input.isRaw : false;
   if (input.isTTY) {
-    console.error("Enter the dedicated OpenCode Go key (hidden; never a general API key):");
+    console.error(go ? "Enter the dedicated OpenCode Go key (hidden; never a general API key):" : "Enter an OpenRouter key (hidden):");
     input.setRawMode(true);
   }
   try {
@@ -38,19 +41,19 @@ async function keyFromStdin(signal?: AbortSignal): Promise<string> {
         signal?.removeEventListener("abort", abort);
         input.pause();
         if (error) reject(error);
-        else { try { resolve(secret(text)); } catch { reject(new Error("Invalid dedicated Go key")); } }
+        else { try { resolve(secret(text)); } catch { reject(new Error("Invalid " + name)); } }
       };
-      const abort = () => finish(new Error("Go key entry cancelled"));
-      const fail = () => finish(new Error("Cannot read dedicated Go key"));
+      const abort = () => finish(new Error(name + " entry cancelled"));
+      const fail = () => finish(new Error("Cannot read " + name));
       const end = () => finish();
       const data = (chunk: Buffer) => {
         for (const byte of chunk) {
-          if (byte === 3 || byte === 4) { finish(new Error("Go key entry cancelled")); return; }
+          if (byte === 3 || byte === 4) { finish(new Error(name + " entry cancelled")); return; }
           if (byte === 10 || byte === 13) { finish(); return; }
           if (byte === 8 || byte === 127) text = text.slice(0, -1);
           else if (byte >= 33 && byte <= 126) text += String.fromCharCode(byte);
-          else { finish(new Error("Invalid dedicated Go key input")); return; }
-          if (text.length > 16384) { finish(new Error("Dedicated Go key too long")); return; }
+          else { finish(new Error("Invalid " + name + " input")); return; }
+          if (text.length > 16384) { finish(new Error(name + " too long")); return; }
         }
       };
       input.on("data", data); input.once("end", end); input.once("error", fail);
@@ -84,7 +87,7 @@ export namespace SubscriptionAuth {
       if (old.pending && vendor === "xai-sub") throw new Error("Subscription refresh outcome uncertain; log in again (refresh will not be replayed)");
       if (!old.pending) usable(old);
       if (!old.pending && old.access !== refused && old.expires > Date.now() + 5 * 60_000) return old;
-      if (vendor === "opencode-go") throw new Denied();
+      if (vendor === "opencode-go" || vendor === "openrouter") throw new Denied();
       // Clear access/models before dispatch. Crash, timeout, invalid JSON or an
       // uncertain response leaves this durable marker; NEVER replay that refresh.
       // Nonrotating identity remints can safely retry this unavailable state.
@@ -122,7 +125,7 @@ export namespace SubscriptionAuth {
       try {
         await login(dir, vendor, {
           signal: controller.signal,
-          key: vendor === "opencode-go" ? await keyFromStdin(controller.signal) : undefined,
+          key: vendor === "opencode-go" || vendor === "openrouter" ? await keyFromStdin(vendor, controller.signal) : undefined,
           show: (url, code) => console.log("Open " + url + " and enter " + code + " only if you started this login."),
         });
         console.log(vendor + ": locally connected; configuration unchanged");

@@ -1230,6 +1230,23 @@ async function notify_off(reg: ServiceWorkerRegistration): Promise<Record<string
 function settings_draw(page: Page): void {
   $("#account .owned").innerHTML = Html.settings_html(page);
   const form = $("#account form.settings", HTMLFormElement);
+  const lists = form.querySelector<HTMLButtonElement>("button.lists");
+  if (lists !== null) {
+    lists.onclick = async () => {
+      const why = lists.parentElement?.querySelector(".why");
+      lists.disabled = true;
+      const out = await View.post("/api/model-lists", {});
+      const failed = Array.isArray(out.failed) ? out.failed.map(String) : [];
+      if (out.ok && failed.length === 0 && !RENEW.dirty.has(form)) {
+        void account();
+        return;
+      }
+      lists.disabled = false;
+      if (why) {
+        why.textContent = !out.ok ? (typeof out.error === "string" ? out.error : "Could not refresh.") : failed.length > 0 ? "Could not fetch the list of " + failed.join(" and ") + "." : "Fetched: save or reload to see them.";
+      }
+    };
+  }
   const rows = new Map<string, Row>(page.settings.map((r) => [r.key, r]));
   const unset = new Set<string>();
   const profs = Object.entries(page.profiles ?? {}).map(([name, list]): [string, string[]] => [name, [...list]]);

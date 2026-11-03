@@ -103,7 +103,7 @@ const TTL: Record<Vendor, number> = {
   "openai-sub" : 1800e3,
   "claude-sub" : 3600e3,
   // No provider cache-lifetime promise for these subscription routes.
-  "xai-sub": 0, "opencode-go": 0, "copilot-sub": 0,
+  "xai-sub": 0, "opencode-go": 0, "copilot-sub": 0, "openrouter": 0,
 };
 
 const PREFIXES = new Map<string, Prefix>();

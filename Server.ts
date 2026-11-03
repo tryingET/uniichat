@@ -1602,6 +1602,9 @@ export namespace Main {
       case "/api/settings": {
         return await Main.settings(req);
       }
+      case "/api/model-lists": {
+        return await Main.lists(req);
+      }
       case "/api/media": {
         if (req.method !== "POST" || req.body === null) {
           return new Response("a file is posted", { status: 405 });
@@ -1850,7 +1853,17 @@ export namespace Main {
     if (config.config_follow()) {
       Chat.offer(Main.chat);
     }
-    void SubscriptionRoster.tend(config.DIR).then((wrote) => wrote && Main.follow());
+    void SubscriptionRoster.tend(config.DIR).then((done) => Object.values(done).some(Boolean) && Main.follow());
+  }
+
+  export async function lists(req: Request): Promise<Response> {
+    if (req.method !== "POST" || !(req.headers.get("content-type") ?? "").startsWith("application/json")) {
+      return new Response("model lists are refreshed by a JSON POST", { status: 405 });
+    }
+    const done = await SubscriptionRoster.tend(config.DIR, true);
+    Main.follow();
+    const failed = Object.entries(done).filter(([, ok]) => !ok).map(([v]) => v);
+    return Response.json({ refreshed: Object.keys(done).length - failed.length, failed }, { headers: { "cache-control": "no-store" } });
   }
 
   export function unowned(err: unknown): void {

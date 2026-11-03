@@ -764,5 +764,20 @@
         "high"
       ]
     }
+  ],
+  "openrouter": [
+    {
+      "label": "openrouter-free",
+      "id": "openrouter/free",
+      "speeds": [
+        "slow"
+      ],
+      "window": 200000,
+      "efforts": [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
   ]
 }

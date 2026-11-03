@@ -2111,7 +2111,6 @@ function row_cells(line, n) {
 function cells_split(line) {
   return line.trim().replace(/^\||(?<!\\)\|$/g, "").split(/(?<!\\)\|/);
 }
-
 // SubscriptionPicks.json
 var SubscriptionPicks_default = {
   "xai-sub": [
@@ -2879,11 +2878,26 @@ var SubscriptionPicks_default = {
         "high"
       ]
     }
+  ],
+  openrouter: [
+    {
+      label: "openrouter-free",
+      id: "openrouter/free",
+      speeds: [
+        "slow"
+      ],
+      window: 200000,
+      efforts: [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
   ]
 };
 
 // SubscriptionPicks.ts
-var SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go", "copilot-sub"];
+var SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go", "copilot-sub", "openrouter"];
 var SubscriptionPicks;
 ((SubscriptionPicks) => {
   function isVendor(vendor) {
@@ -2914,7 +2928,8 @@ var MODELS = {
   "claude-sub": [{ ...OPUS, speeds: ["slow"] }, SONNET, HAIKU],
   "xai-sub": SubscriptionPicks.models("xai-sub"),
   "opencode-go": SubscriptionPicks.models("opencode-go"),
-  "copilot-sub": SubscriptionPicks.models("copilot-sub")
+  "copilot-sub": SubscriptionPicks.models("copilot-sub"),
+  openrouter: SubscriptionPicks.models("openrouter")
 };
 var EFFORTS = ["low", "medium", "high", "xhigh", "max"];
 var SPEEDS = ["slow", "fast", "ultrafast"];
@@ -4335,7 +4350,12 @@ function settings_html(page) {
   const save = `<div class="save"><p class="why"></p><button class="chip go"${page.error === null ? "" : " disabled"}>Save</button></div>`;
   const head = `<p class="sub">The server's settings, in config.json in its folder.</p>`;
   const profiles = page.profiles === null ? "" : section_html("Profiles", `<p class="sub">Ranked models: a chat on a profile runs on the first and falls back to the next when one is out.</p><div class="set profiles" data-key="profiles"><div class="field"></div><p class="err"></p></div>`);
-  return head + error + none + `<form class="settings" autocomplete="off">` + group(GROUPS[0]) + profiles + keys + group(GROUPS[1]) + save + `</form>`;
+  return head + error + none + `<form class="settings" autocomplete="off">` + group(GROUPS[0]) + lists_html(page.fetched) + profiles + keys + group(GROUPS[1]) + save + `</form>`;
+}
+function lists_html(fetched = {}) {
+  const when = Object.entries(fetched).map(([v, at]) => esc(v) + " " + esc(new Date(at).toLocaleString([], { dateStyle: "short", timeStyle: "short" }))).join(" · ");
+  const note = "Each signed-in subscription's models as its provider lists them, fetched daily" + (when === "" ? "." : ". Last: " + when);
+  return section_html("Model lists", `<div class="set lists"><p class="sub">${note}</p><div class="save"><p class="why"></p><button type="button" class="chip lists">Refresh now</button></div></div>`);
 }
 function offered(vendors, models, available) {
   return Pick.models(VENDORS.filter((v) => vendors.includes(v)), models, available).map(([v, m]) => v + ":" + m.label);
@@ -6505,6 +6525,23 @@ async function notify_off(reg) {
 function settings_draw(page) {
   $2("#account .owned").innerHTML = settings_html(page);
   const form = $2("#account form.settings", HTMLFormElement);
+  const lists = form.querySelector("button.lists");
+  if (lists !== null) {
+    lists.onclick = async () => {
+      const why = lists.parentElement?.querySelector(".why");
+      lists.disabled = true;
+      const out = await post("/api/model-lists", {});
+      const failed = Array.isArray(out.failed) ? out.failed.map(String) : [];
+      if (out.ok && failed.length === 0 && !RENEW.dirty.has(form)) {
+        account();
+        return;
+      }
+      lists.disabled = false;
+      if (why) {
+        why.textContent = !out.ok ? typeof out.error === "string" ? out.error : "Could not refresh." : failed.length > 0 ? "Could not fetch the list of " + failed.join(" and ") + "." : "Fetched: save or reload to see them.";
+      }
+    };
+  }
   const rows = new Map(page.settings.map((r) => [r.key, r]));
   const unset = new Set;
   const profs = Object.entries(page.profiles ?? {}).map(([name, list]) => [name, [...list]]);

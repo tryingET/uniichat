@@ -218,7 +218,13 @@ export function settings_html(page: Page): string {
   const save = `<div class="save"><p class="why"></p><button class="chip go"${page.error === null ? "" : " disabled"}>Save</button></div>`;
   const head = `<p class="sub">The server's settings, in config.json in its folder.</p>`;
   const profiles = page.profiles === null ? "" : section_html("Profiles", `<p class="sub">Ranked models: a chat on a profile runs on the first and falls back to the next when one is out.</p><div class="set profiles" data-key="profiles"><div class="field"></div><p class="err"></p></div>`);
-  return head + error + none + `<form class="settings" autocomplete="off">` + group(GROUPS[0]) + profiles + keys + group(GROUPS[1]) + save + `</form>`;
+  return head + error + none + `<form class="settings" autocomplete="off">` + group(GROUPS[0]) + lists_html(page.fetched) + profiles + keys + group(GROUPS[1]) + save + `</form>`;
+}
+
+function lists_html(fetched: Record<string, number> = {}): string {
+  const when = Object.entries(fetched).map(([v, at]) => esc(v) + " " + esc(new Date(at).toLocaleString([], { dateStyle: "short", timeStyle: "short" }))).join(" · ");
+  const note = "Each signed-in subscription's models as its provider lists them, fetched daily" + (when === "" ? "." : ". Last: " + when);
+  return section_html("Model lists", `<div class="set lists"><p class="sub">${note}</p><div class="save"><p class="why"></p><button type="button" class="chip lists">Refresh now</button></div></div>`);
 }
 
 export function offered(vendors: string[], models: string[], available?: Available): string[] {

@@ -7,7 +7,7 @@ import { SubscriptionAuth } from "./SubscriptionAuth.ts";
 import { request, success, type Body } from "./SubscriptionAuthHttp.ts";
 
 const EFFORTS = ["low", "medium", "high", "xhigh", "max"];
-const FRESH = 6 * 3600_000;
+const FRESH = 24 * 3600_000;
 const RETRY = 15 * 60_000;
 const tried: Partial<Record<SubscriptionVendor, number>> = {};
 const asked = new Set<SubscriptionVendor>();
@@ -76,6 +76,25 @@ function copilot(listed: Body, entitled: string[], base: string): SubscriptionMo
   });
 }
 
+// Only OpenRouter's free, tool-capable models: its paid ones are metered.
+function openrouter(listed: Body, base: string): SubscriptionModel[] {
+  const free = (p: Body) => ["prompt", "completion", "request"].every((k) => p[k] === undefined || p[k] === "0");
+  const taken = new Set<string>();
+  return rows(listed).flatMap((r) => {
+    const id = r.id as string;
+    const params = Array.isArray(r.supported_parameters) ? r.supported_parameters : [];
+    if (!free(rec(r.pricing)) || !params.includes("tools")) return [];
+    const short = id.replace(/:free$/, "").replace(/^openrouter\//, "openrouter-").replace(/^.*\//, "");
+    const label = taken.has(short) ? id.replace(/:free$/, "") : short;
+    taken.add(label);
+    const reasoning = params.includes("reasoning");
+    const window = count(r.context_length, 131072);
+    const compat = { supportsStore: false, supportsDeveloperRole: false, maxTokensField: "max_tokens" };
+    const model = made(id, "openai-completions", base, window, count(rec(r.top_provider).max_completion_tokens, 32768), images(rec(r.architecture).input_modalities), reasoning, reasoning && params.includes("reasoning_effort") ? ["low", "medium", "high"] : [], compat);
+    return [{ ...model, label }];
+  });
+}
+
 function file(dir: string, vendor: SubscriptionVendor): string {
   return path.join(path.resolve(dir), "subscription-models", vendor + ".json");
 }
@@ -87,6 +106,7 @@ async function fetched(dir: string, vendor: SubscriptionVendor): Promise<Subscri
   const catalog = SubscriptionModels.catalog(vendor);
   const live = vendor === "xai-sub" ? xai(await get(session.endpoint + "/models"), await get(session.endpoint + "/language-models"))
     : vendor === "opencode-go" ? go(await get(session.endpoint + "/v1/models"), (api) => catalog.find((c) => c.api === api)?.baseUrl ?? session.endpoint)
+    : vendor === "openrouter" ? openrouter(await get(session.endpoint + "/models"), session.endpoint)
     : copilot(await get(session.endpoint + "/models", { ...COPILOT_IDENTITY, "X-GitHub-Api-Version": "2026-06-01" }), session.models ?? [], catalog[0]?.baseUrl ?? session.endpoint);
   return live.map((m) => catalog.find((c) => c.id === m.id) ?? m);
 }
@@ -110,12 +130,19 @@ export namespace SubscriptionRoster {
     fs.renameSync(to + ".new", to);
   }
 
-  // Refreshes a connected vendor's list when it is stale or the sign-in changed; resolves to whether one was written.
-  export async function tend(dir: string): Promise<boolean> {
+  export function when(dir: string): Partial<Record<SubscriptionVendor, number>> {
+    return Object.fromEntries(SUBSCRIPTION_VENDORS.flatMap((v) => {
+      try { return [[v, fs.statSync(file(dir, v)).mtimeMs]]; } catch { return []; }
+    }));
+  }
+
+  // Refreshes a connected vendor's list when it is stale, the sign-in changed, or now; resolves to each refreshed vendor's success.
+  export async function tend(dir: string, now = false): Promise<Partial<Record<SubscriptionVendor, boolean>>> {
     const due = SUBSCRIPTION_VENDORS.filter((v) => {
       const status = SubscriptionAuth.status(dir, v);
       const sign = JSON.stringify(status);
       if (!status.connected || asked.has(v)) return false;
+      if (now) return true;
       let age = Infinity;
       try { age = Date.now() - fs.statSync(file(dir, v)).mtimeMs; } catch { /* none yet */ }
       const changed = seen[v] !== undefined && seen[v] !== sign;
@@ -135,6 +162,6 @@ export namespace SubscriptionRoster {
         asked.delete(v);
       }
     }));
-    return done.some(Boolean);
+    return Object.fromEntries(due.map((v, i) => [v, done[i]]));
   }
 }

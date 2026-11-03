@@ -89,6 +89,10 @@ From source (Bun): `bun install`, `bun run web`, `bun Cli.ts <command>`, `bun ru
 
 **OpenCode Go:** `unii serve opencode-go login` prompts for a dedicated Go key (or reads `UNII_OPENCODE_GO_KEY` for login only); also `status`, `models`, `logout`. Choose `opencode-go` independently in Settings; no generic API-key fallback. Linux verified, Windows unsupported, macOS unverified; check provider billing limits.
 
+**OpenRouter:** `unii serve openrouter login` prompts for an OpenRouter key (or reads `UNII_OPENROUTER_KEY` for login only); only its free models with tools are offered.
+
+Each signed-in subscription's model list is fetched from its provider daily; Settings → Model lists → Refresh now fetches it at once.
+
 **GitHub Copilot:** `unii serve copilot-sub login` (also `status`, `models`, `logout`), then choose `copilot-sub` independently in Settings; only enabled account models are offered. Local logout does not revoke remote authorization. Linux verified, Windows unsupported, macOS unverified; check premium-request limits and billing settings.
 
 Uninstall

@@ -8,6 +8,7 @@ const GITHUB_CLIENT = "Iv1.b507a08c87ecfe98";
 function endpoint(vendor: SubscriptionVendor): string {
   if (vendor === "xai-sub") return "https://api.x.ai/v1";
   if (vendor === "opencode-go") return "https://opencode.ai/zen/go";
+  if (vendor === "openrouter") return "https://openrouter.ai/api/v1";
   throw new Error("Copilot requires an account endpoint");
 }
 function scope(value: unknown): string {
@@ -69,7 +70,7 @@ async function copilotCredential(identity: string, signal?: AbortSignal): Promis
 }
 export async function initial(vendor: SubscriptionVendor, options: LoginOptions): Promise<Credential> {
   options.signal?.throwIfAborted();
-  if (vendor === "opencode-go") return { vendor, access: secret(options.key), expires: Number.MAX_SAFE_INTEGER, endpoint: endpoint(vendor) };
+  if (vendor === "opencode-go" || vendor === "openrouter") return { vendor, access: secret(options.key), expires: Number.MAX_SAFE_INTEGER, endpoint: endpoint(vendor) };
   if (vendor === "xai-sub") return xaiCredential(await device(vendor, "https://auth.x.ai/oauth2/device/code", "https://auth.x.ai/oauth2/token",
     { client_id: XAI_CLIENT, scope: XAI_SCOPE, referrer: "uniichat" }, options));
   const body = await device(vendor, "https://github.com/login/device/code", "https://github.com/login/oauth/access_token", { client_id: GITHUB_CLIENT, scope: "read:user" }, options);
@@ -91,5 +92,5 @@ export function usable(c: Credential, allow_pending = false): void {
     if (!c.pending && !c.models?.length) throw new Denied();
   } else if (c.endpoint !== endpoint(c.vendor)) throw new Denied();
   if (c.vendor === "xai-sub") scope(c.scope);
-  if (c.vendor !== "opencode-go") secret(c.refresh);
+  if (c.vendor !== "opencode-go" && c.vendor !== "openrouter") secret(c.refresh);
 }

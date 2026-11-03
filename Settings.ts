@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as config from "./Config.ts";
-import { LABELS } from "./Pick.ts";
+import { LABELS, Pick, type Available } from "./Pick.ts";
 import { write_whole } from "./Write.ts";
 import { err_code, err_why } from "./Err.ts";
 import { get, rec } from "./Json.ts";
@@ -19,7 +19,7 @@ export type Row = {
 
 export type Key = { name: string; env: string; from: config.From; tail: string };
 
-export type Page = { version: string; settings: Row[]; keys: Key[]; profiles: Record<string, string[]> | null; error: string | null; none: string | null };
+export type Page = { version: string; settings: Row[]; keys: Key[]; profiles: Record<string, string[]> | null; error: string | null; none: string | null; available?: Available };
 
 type Out = { status: number; body: object; saved: string[]; wrote: boolean };
 
@@ -69,7 +69,7 @@ export namespace Settings {
       return { name, env, from, tail: Settings.tail(key) };
     });
     const profiles = process.env.UNII_PROFILES !== undefined ? null : Settings.profiles(file.profiles) ?? {};
-    return { version: snap.version, settings, keys: shown, profiles, error, none: config.config_none() };
+    return { version: snap.version, settings, keys: shown, profiles, error, none: config.config_none(), available: config.config_available() };
   }
 
   export function tail(key: string): string {
@@ -226,7 +226,15 @@ export namespace Settings {
       return { error: unknown === "" ? "Offer at least one model." : "There is no model " + unknown + ".", key: "models" };
     }
     try {
-      config.config_make(file);
+      const made = config.config_make(file);
+      const current = { pick: config.PICK, compactor: config.COMPACTOR, agents: config.AGENTS };
+      for (const key of ["pick", "compactor", "agents"] as const) {
+        const pick = made[key], before = current[key];
+        const unchanged = pick !== null && before !== null && Pick.label(pick) === Pick.label(before) && pick.profile === before.profile;
+        if (changed.has(key) && pick !== null && !unchanged && Pick.read(pick, made.offer) === null) {
+          return { error: "That model is no longer available to this account; pick another.", key };
+        }
+      }
     } catch (err) {
       const text = err_why(err).replace(/^config: /, "");
       const key = text.startsWith("profile") ? "profiles" : config.SETTINGS.find((s) => text.startsWith(s.key + " "))?.key;

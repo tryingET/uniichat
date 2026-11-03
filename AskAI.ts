@@ -1,6 +1,5 @@
 import { Agent } from "./Agent.ts";
 import { ClaudeSub } from "./ClaudeSub.ts";
-import { stream_lines } from "./Clip.ts";
 import { Limit } from "./Limit.ts";
 import { Machine } from "./Machine.ts";
 import { OpenAI } from "./OpenAI.ts";
@@ -8,10 +7,11 @@ import { Pick } from "./Pick.ts";
 import * as config from "./Config.ts";
 import { err_why } from "./Err.ts";
 import { get, text_of } from "./Json.ts";
+import { SubscriptionModels, type SubscriptionVendor } from "./SubscriptionModels.ts";
 
 export type Kind = "user" | "work" | "mind" | "unii" | "tool" | "echo" | "note";
 
-export type Vendor = "claude-api" | "openai-api" | "openai-sub" | "claude-sub";
+export type Vendor = "claude-api" | "openai-api" | "openai-sub" | "claude-sub" | SubscriptionVendor;
 
 export type Img = { type: string; data: string };
 
@@ -102,6 +102,8 @@ const TTL: Record<Vendor, number> = {
   "openai-api" : 1800e3,
   "openai-sub" : 1800e3,
   "claude-sub" : 3600e3,
+  // No provider cache-lifetime promise for these subscription routes.
+  "xai-sub": 0, "opencode-go": 0, "copilot-sub": 0,
 };
 
 const PREFIXES = new Map<string, Prefix>();
@@ -254,7 +256,9 @@ export namespace AskAI {
 
   export function start(ask: Ask, on: (ev: Event) => void): Try {
     try {
-      return ask.vendor === "claude-sub" ? ClaudeSub.ask(ask, on) : Agent.ask(ask, on);
+      // Negotiate search after each profile pick; subscriptions expose none.
+      const request = SubscriptionModels.isVendor(ask.vendor) ? { ...ask, searches: 0 } : ask;
+      return request.vendor === "claude-sub" ? ClaudeSub.ask(request, on) : Agent.ask(request, on);
     } catch (err) {
       return { wake: () => {}, stop: () => {}, done: Promise.resolve(AskAI.end(err_why(err))) };
     }
@@ -353,12 +357,6 @@ export namespace AskAI {
       }
     };
     return { begun, end };
-  }
-
-  export async function* lines(stream: ReadableStream<Uint8Array>) {
-    for await (const lines of stream_lines(stream)) {
-      yield* lines.map((line) => line.trim()).filter((line) => line !== "");
-    }
   }
 
   export function show(content: unknown): string {

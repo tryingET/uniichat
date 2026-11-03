@@ -126,7 +126,9 @@ const SUB_ON     = " on ";
 const SUB_AT     = " at effort ";
 const SUB_ROLE   = new RegExp("^" + SUB_NOTE + "(?:" + SUB_ON + "(\\S+))?(?:" + SUB_AT + "(\\S+))?$");
 
-const MODELS = [...new Set(Pick.models(config.OFFER.vendors, config.OFFER.models).map(([, m]) => m.label))];
+const offered_models = () => [...new Set(Pick.models(config.OFFER.vendors, config.OFFER.models, config.OFFER.available).map(([, m]) => m.label))];
+const MODELS = offered_models();
+config.RELOADED.add(() => MODELS.splice(0, MODELS.length, ...offered_models()));
 
 const TASK = { type: "object", properties: {
   task   : STR,

@@ -1,0 +1,97 @@
+// Native subscription inference. No SDK, auth store, config, fetch,
+// service setup, or HTTP calls here. Chat and compaction use the same Wire.
+import type { Ask } from "./AskAI.ts";
+import type { Step, Wire } from "./Agent.ts";
+import type { SubscriptionModel } from "./SubscriptionModels.ts";
+import { destination, hasImages, object, request, vendorOf } from "./SubscriptionRequest.ts";
+import * as Stream from "./SubscriptionStream.ts";
+
+type State = Stream.State;
+type Connection = {
+  auth: (refused: string | undefined, signal?: AbortSignal) => Promise<string>;
+  endpoint: () => string;
+};
+type NativeWire = Wire<State, unknown> & { auth: Connection["auth"]; reject: (res: Response, body: string, truncated?: boolean) => Step };
+
+// the provider's own message, else the start of its body, without any bearer token it echoes
+function said(message: unknown, body: string): string {
+  const text = typeof message === "string" && message !== "" ? message : body;
+  return text.slice(0, 2000).replace(/Bearer\s+\S+/gi, "Bearer [redacted]");
+}
+
+export namespace SubscriptionWire {
+  export function wire(model: SubscriptionModel, connection: Connection): NativeWire {
+    const vendor = vendorOf(model);
+    const contexts = new WeakMap<Ask, { allowed: Set<string>; initiator: string; vision: boolean }>();
+    // Fail unsafe catalog defaults immediately; validate callback output anew
+    // after every auth/refresh, including before preparing credential headers.
+    destination(model, vendor, model.baseUrl);
+    const endpoint = () => destination(model, vendor, connection.endpoint() || model.baseUrl);
+    return {
+      key: vendor,
+      auth: connection.auth,
+      drain: model.api === "openai-completions",
+      idle: model.api === "anthropic-messages" ? 300e3 : 1200e3,
+      get url() { return endpoint(); },
+      headers: (key, ask) => {
+        endpoint();
+        const headers: Record<string, string> = { authorization: "Bearer " + key, "content-type": "application/json" };
+        if (model.api === "anthropic-messages") {
+          headers["anthropic-version"] = "2023-06-01";
+          if (vendor === "opencode-go") {
+            delete headers.authorization;
+            headers["x-api-key"] = key;
+          }
+        }
+        if (vendor === "copilot-sub") {
+          // Only catalog editor identity headers, never arbitrary auth/host headers.
+          for (const name of ["User-Agent", "Editor-Version", "Editor-Plugin-Version", "Copilot-Integration-Id"]) {
+            const value = model.headers?.[name];
+            if (!value) throw new Error("missing Copilot editor identity");
+            headers[name] = value;
+          }
+          const ctx = contexts.get(ask);
+          if (!ctx) throw new Error("Copilot headers require a prepared request");
+          headers["X-Initiator"] = ctx.initiator;
+          headers["Openai-Intent"] = "conversation-edits";
+          if (ctx.vision) headers["Copilot-Vision-Request"] = "true";
+        }
+        return headers;
+      },
+      body: (ask, items, tools, max) => {
+        const body = request(model, vendor, ask, items, tools, max);
+        contexts.set(ask, { allowed: new Set(tools.map((t) => t.name)), initiator: items.at(-1)?.$ === "User" ? "user" : "agent", vision: hasImages(items) });
+        return body;
+      },
+      start: (ask) => Stream.start(model.api, contexts.get(ask)?.allowed ?? new Set()),
+      read: Stream.read,
+      begun: (event) => {
+        try {
+          const ev = object(event);
+          return model.api === "openai-completions" ? Array.isArray(ev.choices) && ev.choices.length > 0 : ev.type === "message_start" || ev.type === "response.output_item.added";
+        } catch { return false; }
+      },
+      step: Stream.step,
+      reject: (res, body, truncated = false) => {
+        const spent = /insufficient_quota|billing_hard_limit_reached|credit balance is too low/i.test(body);
+        let code: unknown, message: unknown, json: unknown;
+        try { json = JSON.parse(body) as unknown; } catch { message = body; }
+        try {
+          const parsed = object(json);
+          const error = parsed.error === undefined ? parsed : object(parsed.error);
+          code = error.code;
+          message = error.message;
+        } catch {}
+        const context = !truncated && !spent && [400, 413, 422].includes(res.status) && (code === undefined
+          ? typeof message === "string" && /context_length_exceeded|model_context_window_exceeded|prompt is too long|maximum context length|too many input tokens/i.test(message)
+          : typeof code === "string" && ["context_length_exceeded", "model_context_window_exceeded"].includes(code));
+        return {
+          out: [], uses: [], entries: [], note: "",
+          stop: truncated ? "down" : context ? "fail" : spent ? "down" : res.status === 429 ? "limit" : [408, 409].includes(res.status) || res.status >= 500 ? "busy" : "down",
+          off: truncated || spent || [401, 402, 403, 404].includes(res.status),
+          why: truncated ? "HTTP " + res.status + ": error body exceeded the local response limit" : (context ? "Subscription context window exceeded: " : "HTTP " + res.status + ": ") + said(message, body),
+        };
+      },
+    };
+  }
+}

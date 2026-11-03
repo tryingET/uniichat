@@ -85,6 +85,12 @@ Use
 
 From source (Bun): `bun install`, `bun run web`, `bun Cli.ts <command>`, `bun run build` for a single `unii` program.
 
+**xAI subscription:** `unii serve xai-sub login` (also `status`, `models`, `logout`); choose `xai-sub` independently for chat, compactor and subagents in Settings. No metered-API fallback; check your provider's eligibility and billing settings. Native subscription auth is Linux-only verified; Windows unsupported, macOS unverified. [Required third-party notices](SUBSCRIPTION-NOTICE.md).
+
+**OpenCode Go:** `unii serve opencode-go login` prompts for a dedicated Go key (or reads `UNII_OPENCODE_GO_KEY` for login only); also `status`, `models`, `logout`. Choose `opencode-go` independently in Settings; no generic API-key fallback. Linux verified, Windows unsupported, macOS unverified; check provider billing limits.
+
+**GitHub Copilot:** `unii serve copilot-sub login` (also `status`, `models`, `logout`), then choose `copilot-sub` independently in Settings; only enabled account models are offered. Local logout does not revoke remote authorization. Linux verified, Windows unsupported, macOS unverified; check premium-request limits and billing settings.
+
 Uninstall
 ---------
 

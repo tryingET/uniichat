@@ -5,7 +5,9 @@ import * as path from "node:path";
 import type { Vendor } from "./AskAI.ts";
 import { err_code, err_why } from "./Err.ts";
 import { get, list as items, rec, text_of } from "./Json.ts";
-import { EFFORTS, LABELS, VENDORS, Pick, type Fall, type Offer } from "./Pick.ts";
+import { LABELS, VENDORS, Pick, type Fall, type Offer } from "./Pick.ts";
+import { SubscriptionAuth } from "./SubscriptionAuth.ts";
+import { SubscriptionModels } from "./SubscriptionModels.ts";
 
 type ServerOnly = "runs a command";
 
@@ -57,12 +59,17 @@ const USABLE: Record<Vendor, string> = {
   "openai-sub" : "signed in to ChatGPT",
   "claude-api" : "Anthropic key set",
   "openai-api" : "OpenAI key set",
+  "xai-sub": "signed in to xAI subscription",
+  "opencode-go": "dedicated OpenCode Go key set",
+  "copilot-sub": "signed in to GitHub Copilot",
 };
 const DEFAULT_MODEL: Record<Vendor, string> = {
   "claude-sub" : "sonnet-5.5",
   "openai-sub" : "gpt-6.1-sol",
   "claude-api" : "sonnet-5.5",
   "openai-api" : "gpt-6.1-sol",
+  "xai-sub": "grok-4.3", "opencode-go": "minimax-m3",
+  "copilot-sub": "gpt-4.1",
 };
 
 const NONE     = "Not signed in and no API key: sign in with `unii serve claude login` (or `unii serve chatgpt login`) on the server, or set a key in Settings";
@@ -84,7 +91,7 @@ export const CLAUDE     = config_path(config_get("claude", ""));
 const ENV_KEYS: Record<string, string> = Object.fromEntries(Object.entries(VARS).map(([name, v]) => [name, config_key(v)]));
 export const KEYS: Record<string, string> = config_keys(keys_read());
 
-let FOLLOWED = config_usable().join();
+let FOLLOWED = config_usable().join() + JSON.stringify(config_available());
 
 let KEPT: string[] = [];
 
@@ -144,14 +151,19 @@ function config_default_vendors(file: Record<string, unknown>, def: string, usab
 function config_default_pick(file: Record<string, unknown>, def: string, usable: Vendor[]): { value: string; why: string } {
   const offered = config_value(file, "vendors").split(",").map((v) => v.trim());
   const models = config_value(file, "models").split(",").map((m) => m.trim());
-  const model = (v: Vendor) => (models.includes(DEFAULT_MODEL[v]) ? DEFAULT_MODEL[v] : Pick.models([v], models)[0]?.[1].label);
+  const model = (v: Vendor, require_available = true) => {
+    const all = require_available ? Pick.models([v], models, config_available()).map(([, m]) => m) : models.flatMap((label) => Pick.model(v, label) ?? []);
+    return all.find((m) => m.label === DEFAULT_MODEL[v]) ?? all[0];
+  };
   const order = [...usable, ...VENDORS.filter((v) => !usable.includes(v))].filter((v) => offered.includes(v));
-  const vendor = order.find((v) => model(v) !== undefined);
+  const vendor = order.find((v) => model(v) !== undefined) ?? order.find((v) => model(v, false) !== undefined);
   if (vendor === undefined) {
     return { value: def, why: "" };
   }
   const why = usable.includes(vendor) ? USABLE[vendor] : usable.length === 0 ? NONE_WHY : vendor + " has no sign-in or key here";
-  return { value: vendor + ":" + model(vendor) + ":medium:slow", why };
+  const chosen = model(vendor) ?? model(vendor, false);
+  const effort = Pick.efforts(chosen).includes("medium") ? "medium" : Pick.efforts(chosen)[0];
+  return { value: vendor + ":" + chosen.label + ":" + effort + ":slow", why };
 }
 
 function config_named(file: Record<string, unknown>): Vendor[] {
@@ -200,7 +212,11 @@ function config_usable(): Vendor[] {
   };
   const claude = field(CLAUDE_SUB + "/.credentials.json", "claudeAiOauth") != null || field(CLAUDE_SUB + "/.claude.json", "oauthAccount") != null;
   const chatgpt = typeof field(CHATGPT, "tokens", "refresh_token") === "string";
-  const has: Record<Vendor, boolean> = { "claude-sub": claude, "openai-sub": chatgpt, "claude-api": KEYS.anthropic !== "", "openai-api": KEYS.openai !== "" };
+  const has: Record<Vendor, boolean> = { "claude-sub": claude, "openai-sub": chatgpt, "claude-api": KEYS.anthropic !== "", "openai-api": KEYS.openai !== "",
+    "xai-sub": SubscriptionAuth.status(DIR, "xai-sub").connected,
+    "opencode-go": SubscriptionAuth.status(DIR, "opencode-go").connected,
+    "copilot-sub": SubscriptionAuth.status(DIR, "copilot-sub").connected,
+  };
   return (Object.keys(USABLE) as Vendor[]).filter((v) => has[v]);
 }
 
@@ -209,17 +225,21 @@ export function config_none(): string | null {
 }
 
 export function config_follow(): boolean {
-  const now = config_usable().join();
+  const available = config_available();
+  const now = config_usable().join() + JSON.stringify(available);
   if (now === FOLLOWED) {
     return false;
   }
-  FOLLOWED = now;
+  const changed = JSON.stringify(OFFER.available) !== JSON.stringify(available);
+  OFFER.available = available;
   try {
     config_reload();
+    FOLLOWED = now;
     return true;
   } catch (err) {
+    FOLLOWED = "";
     console.error("unii: the sign-ins changed, but " + err_why(err));
-    return false;
+    return changed;
   }
 }
 
@@ -280,10 +300,16 @@ function config_json(file: string, text: string): unknown {
   }
 }
 
+export function config_available(): NonNullable<Offer["available"]> {
+  const status = SubscriptionAuth.status(DIR, "copilot-sub");
+  return { "copilot-sub": status.connected ? status.models ?? [] : [] };
+}
+
 export function config_make(file: Record<string, unknown>): Made {
   const offer: Offer = {
     vendors : config_vendors(config_value(file, "vendors")),
     models  : config_value(file, "models").split(",").map((m) => m.trim()),
+    available: config_available(),
   };
   offer.profiles = config_profiles(file, offer);
   const agents = config_value(file, "agents");
@@ -307,7 +333,7 @@ function config_context(text: string): number {
 
 function config_run(key: string, text: string, offer: Offer): Pick {
   const [vendor, model, effort, speed] = text.split(":");
-  const pick = Pick.read(Object.hasOwn(offer.profiles ?? {}, text) ? { profile: text, effort: "medium", speed: "slow" } : { vendor, model, effort, speed }, offer);
+  const pick = Pick.read(Object.hasOwn(offer.profiles ?? {}, text) ? { profile: text, effort: "medium", speed: "slow" } : { vendor, model, effort, speed }, offer, false);
   if (pick === null) {
     throw new Error("config: " + key + " is no vendor:model:effort:speed or profile offered here: " + text);
   }
@@ -324,7 +350,11 @@ function config_profiles(file: Record<string, unknown>, offer: Offer): Record<st
     if (name.trim() === "" || name.includes(":") || LABELS.includes(name) || !Array.isArray(list) || list.length === 0) {
       throw new Error("config: profile " + JSON.stringify(name) + " is no name (none of a model, no \":\") with a list of models");
     }
-    return [name, items(list).map((f) => config_fall(name, String(f).trim(), offer))];
+    const falls = items(list).map((f) => config_fall(name, String(f).trim(), offer));
+    if (falls.some((f) => SubscriptionModels.isVendor(f.vendor)) && falls.some((f) => f.vendor.endsWith("-api"))) {
+      throw new Error("config: subscription profiles cannot fall back to metered API providers");
+    }
+    return [name, falls];
   }));
 }
 
@@ -332,7 +362,7 @@ function config_fall(name: string, f: string, offer: Offer): Fall {
   const parts = f.split(":");
   const [vendor, label, effort, speed] = parts as [Vendor, string, string?, string?];
   const model = offer.vendors.includes(vendor) && offer.models.includes(label) ? Pick.model(vendor, label) : undefined;
-  const bad = parts.length > 4 || (effort !== undefined && !EFFORTS.includes(effort)) || (speed !== undefined && !model?.speeds.includes(speed));
+  const bad = parts.length > 4 || (effort !== undefined && !Pick.efforts(model).includes(effort)) || (speed !== undefined && !model?.speeds.includes(speed));
   if (model === undefined || bad) {
     throw new Error("config: profile " + JSON.stringify(name) + " has no vendor:model[:effort[:speed]] offered here: " + f);
   }
@@ -439,6 +469,7 @@ export function config_reload(): void {
   const keys = config_keys(keys_read());
   OFFER.vendors = made.offer.vendors;
   OFFER.models = made.offer.models;
+  OFFER.available = made.offer.available;
   OFFER.profiles = made.offer.profiles;
   PICK = made.pick;
   COMPACTOR = made.compactor;

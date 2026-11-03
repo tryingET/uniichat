@@ -91,6 +91,8 @@ From source (Bun): `bun install`, `bun run web`, `bun Cli.ts <command>`, `bun ru
 
 **GitHub Copilot:** `unii serve copilot-sub login` (also `status`, `models`, `logout`), then choose `copilot-sub` independently in Settings; only enabled account models are offered. Local logout does not revoke remote authorization. Linux verified, Windows unsupported, macOS unverified; check premium-request limits and billing settings.
 
+**Muse subscription:** `unii serve muse-sub login` (also `status`, `models`, `logout`), then choose `muse-sub` in Settings for chat, compactor or subagents. Requires a subscription-authorized Muse key; the same Linux-only verification and billing limits above apply.
+
 Uninstall
 ---------
 

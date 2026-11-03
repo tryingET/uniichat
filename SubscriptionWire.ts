@@ -56,6 +56,7 @@ export namespace SubscriptionWire {
           headers["Openai-Intent"] = "conversation-edits";
           if (ctx.vision) headers["Copilot-Vision-Request"] = "true";
         }
+        if (vendor === "muse-sub") headers["x-api-version"] = "1.0.0";
         return headers;
       },
       body: (ask, items, tools, max) => {

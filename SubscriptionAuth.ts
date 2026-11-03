@@ -87,7 +87,7 @@ export namespace SubscriptionAuth {
       if (vendor === "opencode-go") throw new Denied();
       // Clear access/models before dispatch. Crash, timeout, invalid JSON or an
       // uncertain response leaves this durable marker; NEVER replay that refresh.
-      // Nonrotating identity remints can safely retry this unavailable state.
+      // Nonrotating identity remints (Muse, Copilot) can safely retry this unavailable state.
       save(dir, vendor, { ...old, access: "", models: undefined, pending: true });
       try {
         const next = await renew(old);

@@ -9,9 +9,11 @@ const COPILOT_HEADERS = {
   "User-Agent": "GitHubCopilotChat/0.35.0", "Editor-Version": "vscode/1.107.0",
   "Editor-Plugin-Version": "copilot-chat/0.35.0", "Copilot-Integration-Id": "vscode-chat",
 };
+const META_CLIENT = "1031625952748946";
 function endpoint(vendor: SubscriptionVendor): string {
   if (vendor === "xai-sub") return "https://api.x.ai/v1";
   if (vendor === "opencode-go") return "https://opencode.ai/zen/go";
+  if (vendor === "muse-sub") return "https://api.meta.ai/v1";
   throw new Error("Copilot requires an account endpoint");
 }
 function scope(value: unknown): string {
@@ -73,11 +75,25 @@ async function copilotCredential(identity: string, signal?: AbortSignal): Promis
   }, signal));
   return { vendor: "copilot-sub", access, refresh: identity, expires: expires * 1000, endpoint: base, models: entitledModels(raw, base) };
 }
+async function museCredential(identity: string, signal?: AbortSignal): Promise<Credential> {
+  const body = success(await request("https://api.meta.ai/muse-code/key", {
+    method: "POST", headers: { accept: "application/json", authorization: "Bearer " + secret(identity),
+      "content-type": "application/json", "x-api-version": "1.0.0" }, body: "{}",
+  }, signal));
+  // A returned API key alone is NOT evidence of subscription authorization.
+  if (body.is_subs_active !== true || body.require_payment === true || body.require_payment_action_url) throw new Denied();
+  return { vendor: "muse-sub", access: secret(body.api_key), refresh: identity,
+    expires: Date.now() + lifetime(body.expires_in, 86400, 86400) * 1000, endpoint: endpoint("muse-sub") };
+}
 export async function initial(vendor: SubscriptionVendor, options: LoginOptions): Promise<Credential> {
   options.signal?.throwIfAborted();
   if (vendor === "opencode-go") return { vendor, access: secret(options.key), expires: Number.MAX_SAFE_INTEGER, endpoint: endpoint(vendor) };
   if (vendor === "xai-sub") return xaiCredential(await device(vendor, "https://auth.x.ai/oauth2/device/code", "https://auth.x.ai/oauth2/token",
     { client_id: XAI_CLIENT, scope: XAI_SCOPE, referrer: "uniichat" }, options));
+  if (vendor === "muse-sub") {
+    const body = await device(vendor, "https://auth.meta.com/oidc/device/authorization/", "https://auth.meta.com/oidc/device/token/", { client_id: META_CLIENT }, options);
+    return museCredential(secret(body.access_token), options.signal);
+  }
   const body = await device(vendor, "https://github.com/login/device/code", "https://github.com/login/oauth/access_token", { client_id: GITHUB_CLIENT, scope: "read:user" }, options);
   return copilotCredential(secret(body.access_token), options.signal);
 }
@@ -87,10 +103,11 @@ export async function renew(old: Credential): Promise<Credential> {
     grant_type: "refresh_token", client_id: XAI_CLIENT, refresh_token: secret(old.refresh),
   })), old);
   if (old.vendor === "copilot-sub") return copilotCredential(secret(old.refresh));
+  if (old.vendor === "muse-sub") return museCredential(secret(old.refresh));
   throw new Denied();
 }
 export function usable(c: Credential, allow_pending = false): void {
-  if (c.pending && (!allow_pending || c.vendor !== "copilot-sub")) throw new Denied();
+  if (c.pending && (!allow_pending || (c.vendor !== "copilot-sub" && c.vendor !== "muse-sub"))) throw new Denied();
   if (!c.pending) secret(c.access);
   if (c.vendor === "copilot-sub") {
     copilotBase(c.endpoint);

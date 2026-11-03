@@ -46,6 +46,7 @@ const MODELS: Record<Vendor, Model[]> = {
   "xai-sub": SubscriptionModels.models("xai-sub"),
   "opencode-go": SubscriptionModels.models("opencode-go"),
   "copilot-sub": SubscriptionModels.models("copilot-sub"),
+  "muse-sub": SubscriptionModels.models("muse-sub"),
 };
 
 export const EFFORTS = ["low", "medium", "high", "xhigh", "max"];

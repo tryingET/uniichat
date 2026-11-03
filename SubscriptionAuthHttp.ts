@@ -24,6 +24,8 @@ const AUTH_URLS = new Set([
   "https://auth.x.ai/oauth2/device/code", "https://auth.x.ai/oauth2/token",
   "https://github.com/login/device/code",
   "https://github.com/login/oauth/access_token", "https://api.github.com/copilot_internal/v2/token",
+  "https://auth.meta.com/oidc/device/authorization/", "https://auth.meta.com/oidc/device/token/",
+  "https://api.meta.ai/muse-code/key",
 ]);
 function allowed(url: string): boolean {
   if (AUTH_URLS.has(url)) return true;
@@ -84,7 +86,8 @@ export async function device(vendor: SubscriptionVendor, url: string, tokenUrl: 
   const deviceCode = secret(started.device_code);
   const userCode = started.user_code;
   if (typeof userCode !== "string" || !/^[A-Za-z0-9-]{1,64}$/.test(userCode)) throw new Error("Invalid device user code");
-  const hosts = vendor === "xai-sub" ? ["auth.x.ai", "accounts.x.ai", "x.ai"] : ["github.com"];
+  const hosts = vendor === "xai-sub" ? ["auth.x.ai", "accounts.x.ai", "x.ai"]
+    : vendor === "muse-sub" ? ["auth.meta.com", "meta.ai", "www.meta.ai", "www.meta.com"] : ["github.com"];
   let verification: URL;
   try { verification = new URL(String(started.verification_uri)); } catch { throw new Error("Untrusted device verification URL"); }
   if (verification.protocol !== "https:" || verification.username || verification.password || verification.port ||

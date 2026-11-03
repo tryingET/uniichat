@@ -2,7 +2,7 @@
 // Sources and generation provenance are recorded in SubscriptionCatalog.json.
 import catalog from "./SubscriptionCatalog.json";
 
-export const SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go", "copilot-sub"] as const;
+export const SUBSCRIPTION_VENDORS = ["xai-sub", "opencode-go", "muse-sub", "copilot-sub"] as const;
 export type SubscriptionVendor = (typeof SUBSCRIPTION_VENDORS)[number];
 export type SubscriptionApi = "openai-responses" | "openai-completions" | "anthropic-messages";
 export type SubscriptionModel = {

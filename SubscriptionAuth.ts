@@ -114,10 +114,17 @@ export namespace SubscriptionAuth {
     if (args[0] === "logout") {
       await locked(dir, vendor, () => { forget(dir, vendor);  return Promise.resolve(); });
       console.log(vendor + ": local credentials removed (provider session not revoked)");
-    } else if (args[0] === "status" || args[0] === "models") {
-      // Local snapshot only; Copilot models are the last enabled account roster.
+    } else if (args[0] === "status") {
+      console.log(JSON.stringify(status(dir, vendor)));
+    } else if (args[0] === "models") {
       const connection = status(dir, vendor);
-      console.log(JSON.stringify(args[0] === "models" ? { ...connection, catalog: SubscriptionModels.models(vendor).map((m) => m.id), catalog_scope: "public capabilities, not account entitlement" } : connection));
+      const { SubscriptionRoster } = await import("./SubscriptionRoster.ts");
+      let error: string | undefined;
+      if (connection.connected) await SubscriptionRoster.refresh(dir, vendor).catch((err: unknown) => { error = err instanceof Error ? err.message : String(err); });
+      const listed = SubscriptionRoster.read(dir, vendor);
+      const at = SubscriptionRoster.when(dir)[vendor];
+      const source = listed === undefined ? "built-in catalog" : "provider list of " + new Date(at ?? 0).toISOString();
+      console.log(JSON.stringify({ ...connection, models: (listed ?? SubscriptionModels.catalog(vendor)).map((m) => m.id), source, ...(error ? { error } : {}) }));
     } else {
       const controller = new AbortController();
       const abort = () => controller.abort();

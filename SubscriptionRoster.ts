@@ -121,7 +121,7 @@ export namespace SubscriptionRoster {
     }
   }
 
-  async function refresh(dir: string, vendor: SubscriptionVendor): Promise<void> {
+  export async function refresh(dir: string, vendor: SubscriptionVendor): Promise<void> {
     const list = await fetched(dir, vendor);
     if (list.length === 0) throw new Error("no models");
     const to = file(dir, vendor);

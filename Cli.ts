@@ -146,7 +146,7 @@ function plan(name: "claude" | "chatgpt", about: string): Cmd {
 
 function subscription(vendor: SubscriptionVendor): Cmd {
   return { use: vendor, about: "native subscription provider (chat and compaction)", kids: ["login", "logout", "status", "models"].map((word): Cmd => ({
-    use: word, about: word === "login" ? "connect this provider" : word === "logout" ? "forget local credentials" : "local connection/catalog status",
+    use: word, about: word === "login" ? "connect this provider" : word === "logout" ? "forget local credentials" : word === "models" ? "fetch and show the provider's current models" : "local connection status",
     run: async () => {
       // Recovery must not import Config: a disconnected configured pick may be invalid.
       const dir = (process.env.UNII_DIR ?? "~/.unii").replace(/^~(?=[\\/]|$)/, (await import("node:os")).homedir());

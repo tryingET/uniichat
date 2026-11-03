@@ -3,7 +3,7 @@
 import type { Ask } from "./AskAI.ts";
 import { VERSION } from "./Update.ts";
 import type { Step, Wire } from "./Agent.ts";
-import type { SubscriptionModel } from "./SubscriptionModels.ts";
+import { COPILOT_IDENTITY, type SubscriptionModel } from "./SubscriptionModels.ts";
 import { destination, hasImages, object, request, vendorOf } from "./SubscriptionRequest.ts";
 import * as Stream from "./SubscriptionStream.ts";
 
@@ -43,12 +43,7 @@ export namespace SubscriptionWire {
           }
         }
         if (vendor === "copilot-sub") {
-          // Only catalog editor identity headers, never arbitrary auth/host headers.
-          for (const name of ["User-Agent", "Editor-Version", "Editor-Plugin-Version", "Copilot-Integration-Id"]) {
-            const value = model.headers?.[name];
-            if (!value) throw new Error("missing Copilot editor identity");
-            headers[name] = value;
-          }
+          Object.assign(headers, COPILOT_IDENTITY);
           const ctx = contexts.get(ask);
           if (!ctx) throw new Error("Copilot headers require a prepared request");
           headers["X-Initiator"] = ctx.initiator;
@@ -59,7 +54,7 @@ export namespace SubscriptionWire {
       },
       body: (ask, items, tools, max) => {
         const body = request(model, vendor, ask, items, tools, max);
-        contexts.set(ask, { allowed: new Set(tools.map((t) => t.name)), initiator: items.at(-1)?.$ === "User" ? "user" : "agent", vision: hasImages(items) });
+        contexts.set(ask, { allowed: new Set(tools.map((t) => t.name)), initiator: items.at(-1)?.$ === "Back" ? "agent" : "user", vision: hasImages(items) });
         return body;
       },
       start: (ask) => Stream.start(model.api, contexts.get(ask)?.allowed ?? new Set()),

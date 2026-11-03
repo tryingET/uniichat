@@ -2,6 +2,7 @@
 // Sources and generation provenance are recorded in SubscriptionCatalog.json.
 import catalog from "./SubscriptionCatalog.json";
 import { SubscriptionPicks, type SubscriptionVendor } from "./SubscriptionPicks.ts";
+import { VERSION } from "./Update.ts";
 
 export { SUBSCRIPTION_VENDORS, type SubscriptionVendor } from "./SubscriptionPicks.ts";
 export type SubscriptionApi = "openai-responses" | "openai-completions" | "anthropic-messages";
@@ -9,8 +10,10 @@ export type SubscriptionModel = {
   label: string; id: string; speeds: string[]; window: number; output: number;
   api: SubscriptionApi; baseUrl: string; reasoning: boolean; input: string[];
   efforts: string[]; thinkingLevelMap?: Record<string, string | number | null>;
-  compat?: Record<string, unknown>; headers?: Record<string, string>;
+  compat?: Record<string, unknown>;
 };
+
+export const COPILOT_IDENTITY = { "User-Agent": "unii/" + VERSION, "Editor-Version": "unii/" + VERSION };
 
 export namespace SubscriptionModels {
   export const isVendor = SubscriptionPicks.isVendor;

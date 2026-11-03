@@ -492,12 +492,6 @@
         ],
         "compat": {
           "supportsEagerToolInputStreaming": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-opus-4.5": {
@@ -508,13 +502,7 @@
         "input": [
           "text",
           "image"
-        ],
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
-        }
+        ]
       },
       "claude-opus-4.6": {
         "output": 32000,
@@ -530,12 +518,6 @@
         },
         "compat": {
           "forceAdaptiveThinking": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-opus-4.7": {
@@ -555,12 +537,6 @@
         "compat": {
           "forceAdaptiveThinking": true,
           "supportsTemperature": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-opus-4.8": {
@@ -580,12 +556,6 @@
         "compat": {
           "forceAdaptiveThinking": true,
           "supportsTemperature": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-opus-5": {
@@ -605,12 +575,6 @@
         "compat": {
           "forceAdaptiveThinking": true,
           "supportsTemperature": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-sonnet-4": {
@@ -624,12 +588,6 @@
         ],
         "compat": {
           "supportsEagerToolInputStreaming": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-sonnet-4.5": {
@@ -643,12 +601,6 @@
         ],
         "compat": {
           "supportsEagerToolInputStreaming": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-sonnet-4.6": {
@@ -666,12 +618,6 @@
         },
         "compat": {
           "forceAdaptiveThinking": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-sonnet-5": {
@@ -689,12 +635,6 @@
         },
         "compat": {
           "forceAdaptiveThinking": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "claude-fable-5": {
@@ -715,12 +655,6 @@
           "supportsStore": false,
           "supportsDeveloperRole": false,
           "supportsReasoningEffort": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gemini-3.1-pro-preview": {
@@ -736,12 +670,6 @@
           "supportsStore": false,
           "supportsDeveloperRole": false,
           "supportsReasoningEffort": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gemini-3.5-flash": {
@@ -757,12 +685,6 @@
           "supportsStore": false,
           "supportsDeveloperRole": false,
           "supportsReasoningEffort": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gemini-3.6-flash": {
@@ -778,12 +700,6 @@
           "supportsStore": false,
           "supportsDeveloperRole": false,
           "supportsReasoningEffort": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gemini-3.7-flash": {
@@ -799,12 +715,6 @@
           "supportsStore": false,
           "supportsDeveloperRole": false,
           "supportsReasoningEffort": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-4.1": {
@@ -820,12 +730,6 @@
           "supportsStore": false,
           "supportsDeveloperRole": false,
           "supportsReasoningEffort": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "kimi-k2.7-code": {
@@ -841,12 +745,6 @@
           "supportsStore": false,
           "supportsDeveloperRole": false,
           "supportsReasoningEffort": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "kimi-k3": {
@@ -862,12 +760,6 @@
           "supportsStore": false,
           "supportsDeveloperRole": false,
           "supportsReasoningEffort": false
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5-mini": {
@@ -890,12 +782,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.2": {
@@ -914,12 +800,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.2-codex": {
@@ -938,12 +818,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.3-codex": {
@@ -966,12 +840,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.4": {
@@ -994,12 +862,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.4-mini": {
@@ -1022,12 +884,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.4-nano": {
@@ -1046,12 +902,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.5": {
@@ -1074,12 +924,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.6-luna": {
@@ -1102,12 +946,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.6-sol": {
@@ -1130,12 +968,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "gpt-5.6-terra": {
@@ -1158,12 +990,6 @@
         },
         "compat": {
           "supportsOpenAIGrammarTools": true
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "grok-4.5": {
@@ -1183,12 +1009,6 @@
           "high": "high",
           "xhigh": null,
           "max": null
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "grok-4.6": {
@@ -1208,12 +1028,6 @@
           "high": "high",
           "xhigh": "xhigh",
           "max": null
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "mai-code-1-flash-picker": {
@@ -1232,12 +1046,6 @@
           "high": "high",
           "xhigh": null,
           "max": null
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       },
       "mai-code-1.1-flash": {
@@ -1257,12 +1065,6 @@
           "high": "high",
           "xhigh": null,
           "max": null
-        },
-        "headers": {
-          "User-Agent": "GitHubCopilotChat/0.35.0",
-          "Editor-Version": "vscode/1.107.0",
-          "Editor-Plugin-Version": "copilot-chat/0.35.0",
-          "Copilot-Integration-Id": "vscode-chat"
         }
       }
     }

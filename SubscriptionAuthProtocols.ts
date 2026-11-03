@@ -1,14 +1,10 @@
-import { SubscriptionModels, type SubscriptionVendor } from "./SubscriptionModels.ts";
+import { COPILOT_IDENTITY, SubscriptionModels, type SubscriptionVendor } from "./SubscriptionModels.ts";
 import { secret, type Credential } from "./SubscriptionAuthStore.ts";
 import { copilotBase, Denied, device, form, lifetime, request, success, type Body, type LoginOptions } from "./SubscriptionAuthHttp.ts";
 
 const XAI_CLIENT = "b1a00492-073a-47ea-816f-4c329264a828";
 const XAI_SCOPE = "openid profile email offline_access grok-cli:access api:access";
 const GITHUB_CLIENT = "Iv1.b507a08c87ecfe98";
-const COPILOT_HEADERS = {
-  "User-Agent": "GitHubCopilotChat/0.35.0", "Editor-Version": "vscode/1.107.0",
-  "Editor-Plugin-Version": "copilot-chat/0.35.0", "Copilot-Integration-Id": "vscode-chat",
-};
 function endpoint(vendor: SubscriptionVendor): string {
   if (vendor === "xai-sub") return "https://api.x.ai/v1";
   if (vendor === "opencode-go") return "https://opencode.ai/zen/go";
@@ -60,7 +56,7 @@ function copilotEndpoint(body: Body): string {
 }
 async function copilotCredential(identity: string, signal?: AbortSignal): Promise<Credential> {
   const body = success(await request("https://api.github.com/copilot_internal/v2/token", {
-    headers: { accept: "application/json", authorization: "Bearer " + secret(identity), ...COPILOT_HEADERS },
+    headers: { accept: "application/json", authorization: "Bearer " + secret(identity), ...COPILOT_IDENTITY },
   }, signal));
   const base = copilotEndpoint(body);
   const expires = body.expires_at;
@@ -69,7 +65,7 @@ async function copilotCredential(identity: string, signal?: AbortSignal): Promis
   }
   const access = secret(body.token);
   const raw = success(await request(base + "/models", {
-    headers: { accept: "application/json", authorization: "Bearer " + access, ...COPILOT_HEADERS, "X-GitHub-Api-Version": "2026-06-01" },
+    headers: { accept: "application/json", authorization: "Bearer " + access, ...COPILOT_IDENTITY, "X-GitHub-Api-Version": "2026-06-01" },
   }, signal));
   return { vendor: "copilot-sub", access, refresh: identity, expires: expires * 1000, endpoint: base, models: entitledModels(raw, base) };
 }

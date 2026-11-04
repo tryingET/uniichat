@@ -700,18 +700,19 @@ export namespace Memory {
     const lines: string[] = [];
     const ran = { by: "" };
     let end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, blocks, ran));
-    const bys = new Set<string>();
+    const bys: string[] = [];
     while (end.ok && end.text.trim() !== "") {
       const line = end.text.trim();
       lines.push(line);
-      bys.add(ran.by);
+      bys.push(ran.by);
       if (Memory.bytes(line) <= NODE || lines.length === TRIES || mem.done) {
         break;
       }
       const note = { text: Memory.over(line), mark: false };
       end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, [...blocks, note], ran));
     }
-    return { lines, end, by: [...bys].join(" + ") };
+    const k = lines.length === 0 ? -1 : lines.indexOf(Memory.shortest(lines));
+    return { lines, end, by: bys[k] ?? "" };
   }
 
   export function cut_short(end: Answered): boolean {

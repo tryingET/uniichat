@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import { AskAI, type Again, type Ask, type Block, type Call, type End as Answered, type Event, type Img, type Kind, type Say } from "./AskAI.ts";
 import { clip_page, clip_pages } from "./Clip.ts";
+import { Compact } from "./Compact.ts";
 import * as config from "./Config.ts";
 import { Disk } from "./Disk.ts";
 import { err_code, err_why } from "./Err.ts";
@@ -95,7 +96,6 @@ export const JOBS = 64;
 const LOGGED = 60e3;
 
 const FAILED = new Map<string, number>();
-const TRIES = 5;
 const VIEW_HIGH = 128000;
 
 const TALK_SHARE_OF_WINDOW = 3 / 4;
@@ -127,17 +127,15 @@ const PAGE_MAX = 4 * 2 ** 20;
 const AGENTS = "/docs/agent/";
 
 const LEAF = `Compaction: compress message {id} into one line of at most ${NODE} bytes
-(about 70 words), the length of this ruler:
+(at most 60 words), the length of this ruler:
 ${NODE_RULER}
-<input>
 `;
 
 const MERGE = `Compaction: merge lines {a} and {b}, adjacent, into one line of at most
-${NODE} bytes (about 70 words), the length of this ruler:
+${NODE} bytes (at most 60 words), the length of this ruler:
 ${NODE_RULER}
 <chat> may hold their messages, {id} to {end}, in more detail: take details
 of them from there too.
-<input>
 `;
 
 export namespace Memory {
@@ -682,37 +680,16 @@ export namespace Memory {
   }
 
   export async function build(mem: Memory, l: number, i: number, text: string): Promise<void> {
-    const task = { text: Memory.task(l, i) + text + "\n</input>", mark: false };
     const upto = Math.min(Memory.ctx(l, i), Memory.first(mem, 0, Memory.side(mem, l, i)));
-    const blocks = [...Memory.view(mem, upto, Memory.last(mem, Memory.before(mem.seen.parts, upto), config.COMPACTOR_CONTEXT)), task];
-    const { lines, end, by } = await Memory.ask_till_fits(mem, l, i, blocks);
-    if (lines.length === 0 && Memory.cut_short(end)) {
+    const chat = Memory.view(mem, upto, Memory.last(mem, Memory.before(mem.seen.parts, upto), config.COMPACTOR_CONTEXT)).map((block) => block.text).join("");
+    const { line, by, end } = await Compact.run(mem, l, i, chat, Memory.task(l, i), "<input>\n" + text + "\n</input>");
+    if (line === null && end !== null && Memory.cut_short(end)) {
       throw new Error(end.text);
     }
-    if (lines.length === 0) {
-      console.error("compactor: node " + l + "/" + i + ": " + (end.ok ? "an empty line" : end.text) + "; clipped");
+    if (line === null) {
+      console.error("compactor: node " + l + "/" + i + ": " + (end === null || end.ok ? "an empty line" : end.text) + "; clipped");
     }
-    const line = lines.length === 0 ? Memory.cut(Memory.flat(text)) : Memory.shortest(lines);
-    Memory.store(mem, [{ l, i, text: line, ...(lines.length === 0 ? {} : { by }) }]);
-  }
-
-  export async function ask_till_fits(mem: Memory, l: number, i: number, blocks: Block[]): Promise<{ lines: string[]; end: Answered; by: string }> {
-    const lines: string[] = [];
-    const ran = { by: "" };
-    let end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, blocks, ran));
-    const bys: string[] = [];
-    while (end.ok && end.text.trim() !== "") {
-      const line = end.text.trim();
-      lines.push(line);
-      bys.push(ran.by);
-      if (Memory.bytes(line) <= NODE || lines.length === TRIES || mem.done) {
-        break;
-      }
-      const note = { text: Memory.over(line), mark: false };
-      end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, [...blocks, note], ran));
-    }
-    const k = lines.length === 0 ? -1 : lines.indexOf(Memory.shortest(lines));
-    return { lines, end, by: bys[k] ?? "" };
+    Memory.store(mem, [{ l, i, text: line ?? Memory.cut(Memory.flat(text)), ...(line === null ? {} : { by }) }]);
   }
 
   export function cut_short(end: Answered): boolean {
@@ -746,13 +723,13 @@ export namespace Memory {
     parts.forEach(({ l, i }) => mem.made?.(l, i));
   }
 
-  export function ask(mem: Memory, l: number, i: number, blocks: Block[], ran: { by: string }): Call {
+  export function ask(mem: Memory, l: number, i: number, blocks: Block[], ran: { by: string }, system: string): Call {
     const own = Memory.served(mem, l, i) === "compactor";
     const repick = () => Pick.ask(config.COMPACTOR);
     const told: { again: Again | null } = { again: null };
     const pick = repick();
     ran.by = Pick.label(Pick.named(pick));
-    return AskAI.ask({ ...mem.share(), ...pick, blocks, patient: true, repick, yields: own ? undefined : mem.dir, who: own ? "compactor" : "import" }, (ev) => {
+    return AskAI.ask({ ...mem.share(), system, ...pick, blocks, patient: true, repick, yields: own ? undefined : mem.dir, who: own ? "compactor" : "import" }, (ev) => {
       if (ev.$ === "Run") {
         ran.by = Pick.label(ev.run);
       }
@@ -800,10 +777,10 @@ export namespace Memory {
   }
 
   export function over(line: string): string {
-    return `Too long: your last line for this <input> was ${Memory.bytes(line)} bytes,
-over the ${NODE}-byte limit. Write the whole line again, cutting just
-enough of the least valuable items to fit before this cut:
-${Memory.cut(line)}| ← LIMIT`;
+    const words = line.split(/\s+/).length;
+    return `Too long: your last line for this <input> was ${Memory.bytes(line)} bytes and ${words} words,
+over the ${NODE}-byte limit. Write the whole line again in at most ${Math.floor((words * (NODE - 112)) / Memory.bytes(line))} words,
+dropping the least valuable items whole.`;
   }
 
   export function text(mem: Memory, part: Part): string {

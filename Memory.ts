@@ -685,7 +685,7 @@ export namespace Memory {
     const task = { text: Memory.task(l, i) + text + "\n</input>", mark: false };
     const upto = Math.min(Memory.ctx(l, i), Memory.first(mem, 0, Memory.side(mem, l, i)));
     const blocks = [...Memory.view(mem, upto, Memory.last(mem, Memory.before(mem.seen.parts, upto), config.COMPACTOR_CONTEXT)), task];
-    const { lines, end } = await Memory.ask_till_fits(mem, l, i, blocks);
+    const { lines, end, by } = await Memory.ask_till_fits(mem, l, i, blocks);
     if (lines.length === 0 && Memory.cut_short(end)) {
       throw new Error(end.text);
     }
@@ -693,22 +693,25 @@ export namespace Memory {
       console.error("compactor: node " + l + "/" + i + ": " + (end.ok ? "an empty line" : end.text) + "; clipped");
     }
     const line = lines.length === 0 ? Memory.cut(Memory.flat(text)) : Memory.shortest(lines);
-    Memory.store(mem, [{ l, i, text: line }]);
+    Memory.store(mem, [{ l, i, text: line, ...(lines.length === 0 ? {} : { by }) }]);
   }
 
-  export async function ask_till_fits(mem: Memory, l: number, i: number, blocks: Block[]): Promise<{ lines: string[]; end: Answered }> {
+  export async function ask_till_fits(mem: Memory, l: number, i: number, blocks: Block[]): Promise<{ lines: string[]; end: Answered; by: string }> {
     const lines: string[] = [];
-    let end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, blocks));
+    const ran = { by: "" };
+    let end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, blocks, ran));
+    const bys = new Set<string>();
     while (end.ok && end.text.trim() !== "") {
       const line = end.text.trim();
       lines.push(line);
+      bys.add(ran.by);
       if (Memory.bytes(line) <= NODE || lines.length === TRIES || mem.done) {
         break;
       }
       const note = { text: Memory.over(line), mark: false };
-      end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, [...blocks, note]));
+      end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, [...blocks, note], ran));
     }
-    return { lines, end };
+    return { lines, end, by: [...bys].join(" + ") };
   }
 
   export function cut_short(end: Answered): boolean {
@@ -723,8 +726,10 @@ export namespace Memory {
     return Memory.side(mem, l, i) === 1 ? "import" : "compactor";
   }
 
-  export function store(mem: Memory, parts: Array<Part & { text: string }>): void {
-    Memory.log(mem, "tree", parts.map(({ l, i, text }) => ({ l, i, text, size: Memory.bytes(text) })));
+  // by: the model that wrote the summary; without it, the text is its source's, copied or clipped.
+  export function store(mem: Memory, parts: Array<Part & { text: string; by?: string }>): void {
+    const at = new Date().toISOString();
+    Memory.log(mem, "tree", parts.map(({ l, i, text, by }) => ({ l, i, text, size: Memory.bytes(text), at, ...(by ? { by } : {}) })));
     for (const { l, i, text } of parts) {
       Memory.ready(mem, { l, i }, false);
       mem.nodes.set(Memory.slot(l, i), text);
@@ -740,11 +745,18 @@ export namespace Memory {
     parts.forEach(({ l, i }) => mem.made?.(l, i));
   }
 
-  export function ask(mem: Memory, l: number, i: number, blocks: Block[]): Call {
+  export function ask(mem: Memory, l: number, i: number, blocks: Block[], ran: { by: string }): Call {
     const own = Memory.served(mem, l, i) === "compactor";
     const repick = () => Pick.ask(config.COMPACTOR);
     const told: { again: Again | null } = { again: null };
-    return AskAI.ask({ ...mem.share(), ...repick(), blocks, patient: true, repick, yields: own ? undefined : mem.dir, who: own ? "compactor" : "import" }, (ev) => Memory.heard(mem, own, ev, told));
+    const pick = repick();
+    ran.by = Pick.label(Pick.named(pick));
+    return AskAI.ask({ ...mem.share(), ...pick, blocks, patient: true, repick, yields: own ? undefined : mem.dir, who: own ? "compactor" : "import" }, (ev) => {
+      if (ev.$ === "Run") {
+        ran.by = Pick.label(ev.run);
+      }
+      Memory.heard(mem, own, ev, told);
+    });
   }
 
   export function heard(mem: Memory, own: boolean, ev: Event, told: { again: Again | null }): void {

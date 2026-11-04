@@ -126,6 +126,7 @@ export namespace AskAI {
     const { promise, resolve } = Promise.withResolvers<End>();
     const out: Call = { wake, stop, done: promise };
     let picks = AskAI.falls(ask);
+    const first = picks.map(Pick.label)[0];
     let whys: (string | null)[] = picks.map(() => null);
     const skip = (from: number): number => {
       const to = AskAI.up(picks, from);
@@ -141,7 +142,7 @@ export namespace AskAI {
       const run = picks[k];
       const from = k > 0 ? picks[k - 1] : null;
       const why = from === null ? "" : whys[k - 1] ?? DOWN.get(AskAI.down_key(from))?.why ?? "";
-      let heard = picks.length === 1;
+      let heard = picks.length === 1 && Pick.label(run) === first;
       const hear = (ev: Event) => {
         if (!heard && (ev.$ === "Delta" || (ev.$ === "Entry" && ev.kind !== "mind"))) {
           heard = true;

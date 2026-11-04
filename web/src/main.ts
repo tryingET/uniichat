@@ -1092,6 +1092,7 @@ async function account(): Promise<void> {
     void account_prompt(form);
   }));
   mcp_draw();
+  el.querySelectorAll<HTMLButtonElement>("[data-jump]").forEach((b) => (b.onclick = () => document.getElementById("s-" + (b.dataset.jump ?? ""))?.scrollIntoView({ behavior: "smooth", block: "start" })));
   el.querySelectorAll<HTMLButtonElement>(".retry").forEach((retry) => (retry.onclick = () => void account()));
   $("#account .out").onclick = () => void signout();
   const bell = document.querySelector<HTMLButtonElement>("#account .notify");
@@ -1233,7 +1234,7 @@ function settings_draw(page: Page): void {
   const lists = form.querySelector<HTMLButtonElement>("button.lists");
   if (lists !== null) {
     lists.onclick = async () => {
-      const why = lists.parentElement?.querySelector(".why");
+      const why = form.querySelector(".lists-why");
       lists.disabled = true;
       const out = await View.post("/api/model-lists", {});
       const failed = Array.isArray(out.failed) ? out.failed.map(String) : [];
@@ -1254,11 +1255,15 @@ function settings_draw(page: Page): void {
   const names = () => profs.map(([name]) => name.trim()).filter((name) => name !== "");
   const listed = (key: string) => {
     const boxes = [...form.querySelectorAll<HTMLInputElement>(`input[name="${key}"]`)];
-    return boxes.length === 0 ? Html.list(rows.get(key)?.value ?? "") : boxes.filter((b) => b.checked).map((b) => b.value);
+    return boxes.length === 0 ? Html.list(rows.get(key)?.value ?? "") : [...new Set(boxes.filter((b) => b.checked).map((b) => b.value))];
   };
   const picks = () => {
     const vendors = listed("vendors");
-    form.querySelectorAll<HTMLElement>(".opt[data-vendor]:not([data-vendor=''])").forEach((o) => (o.hidden = !(o.dataset.vendor ?? "").split(" ").some((v) => vendors.includes(v))));
+    form.querySelectorAll<HTMLElement>(".vend").forEach((card) => {
+      const boxes = [...card.querySelectorAll<HTMLInputElement>("input[name=models]")];
+      card.classList.toggle("off", card.dataset.vendor !== "" && !vendors.includes(card.dataset.vendor ?? ""));
+      must(card.querySelector(".count"), "the card's count").textContent = boxes.filter((b) => b.checked).length + "/" + boxes.length;
+    });
     for (const key of Html.PICKS) {
       const value = form.querySelector<HTMLInputElement>(`input[name="${key}"]`);
       const four = value?.parentElement?.querySelector<HTMLElement>(".four");
@@ -1274,15 +1279,33 @@ function settings_draw(page: Page): void {
       const typed = form.querySelector<HTMLInputElement>(`[name="key.${name}"]`)?.value.trim() ?? "";
       return key !== undefined && (key.from === "default" || unset.has("key." + name)) && typed === "";
     });
+    form.querySelectorAll<HTMLElement>(".vend").forEach((card) => card.classList.toggle("nokey", keyless.includes(card.dataset.vendor ?? "")));
     const warn = form.querySelector(".warn");
     if (warn !== null) {
       warn.textContent = keyless.length === 0 ? "" : keyless.join(" and ") + (keyless.length === 1 ? " has" : " have") + " no key set: its calls will fail till one is.";
     }
   };
+  const find = form.querySelector<HTMLInputElement>(".find");
+  find?.addEventListener("input", (ev) => {
+    ev.stopPropagation();
+    const q = find.value.trim().toLowerCase();
+    form.querySelectorAll<HTMLElement>(".vend .opt").forEach((o) => (o.hidden = q !== "" && !(o.textContent ?? "").toLowerCase().includes(q)));
+    form.querySelectorAll<HTMLElement>(".vend").forEach((card) => card.classList.toggle("miss", q !== "" && card.querySelector(".opt:not([hidden])") === null));
+  });
   form.oninput = (ev) => {
-    const el = (ev.target as HTMLElement).closest<HTMLElement>(".set");
+    const target = ev.target as HTMLInputElement;
+    const listy = target.type === "checkbox" && (target.name === "vendors" || target.name === "models");
+    const el = listy ? form.querySelector<HTMLElement>(`.set[data-key="${target.name}"]`) : target.closest<HTMLElement>(".set");
     if (el === null) {
       return;
+    }
+    form.classList.add("dirty");
+    if (listy) {
+      form.querySelectorAll<HTMLInputElement>(`input[name="${target.name}"]`).forEach((b) => {
+        if (b.value === target.value) {
+          b.checked = target.checked;
+        }
+      });
     }
     unset.delete(el.dataset.key ?? "");
     el.classList.remove("unset");
@@ -1297,6 +1320,15 @@ function settings_draw(page: Page): void {
     }
   };
   form.onclick = (ev) => {
+    const bulk = (ev.target as HTMLElement).closest<HTMLButtonElement>("[data-bulk]");
+    if (bulk !== null) {
+      const boxes = [...(bulk.closest(".vend")?.querySelectorAll<HTMLInputElement>(".opt:not([hidden]) input[name=models]") ?? [])];
+      boxes.forEach((b) => {
+        b.checked = bulk.dataset.bulk === "all";
+        b.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      return;
+    }
     const btn = (ev.target as HTMLElement).closest<HTMLButtonElement>(".reset");
     if (btn === null) {
       return;
@@ -1304,7 +1336,8 @@ function settings_draw(page: Page): void {
     const el = must(btn.closest<HTMLElement>(".set"), "the reset's setting");
     const key = el.dataset.key ?? "";
     const r = rows.get(key);
-    el.querySelectorAll<HTMLInputElement>("input[type=checkbox]").forEach((b) => (b.checked = Html.list(r?.def ?? "").includes(b.value)));
+    form.classList.add("dirty");
+    form.querySelectorAll<HTMLInputElement>(`input[type=checkbox][name="${key}"]`).forEach((b) => (b.checked = Html.list(r?.def ?? "").includes(b.value)));
     el.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input:not([type=checkbox]), textarea").forEach((i) => (i.value = r?.def ?? ""));
     picks();
     unset.add(key);

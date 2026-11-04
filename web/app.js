@@ -4297,8 +4297,9 @@ function account_html(prompts, notify = null) {
   ];
   const unread = item("Could not read the prompts.", "", `<button class="chip retry">Try again</button>`);
   const mine = section_html("Prompts", prompts === null ? unread : prompt_html("prompt", prompts.prompt.text, "The user prompt: Unii's system prompt in every turn; its subagents get it too once you change it. Add who you are and how you want work done at its end. prompt.md in the server's folder; empty: the built-in one.") + prompt_html("compact", prompts.compact.text, "The compaction prompt: all a summary of the memory gets, nothing else. compact.md in the server's folder; empty: the built-in one."));
-  const mcp = section_html("MCP servers", `<div class="mcp"></div>`);
-  return `<a class="back" href="/" data-go="/">← Chat</a><h1>Settings</h1>` + mine + section_html("This browser", acts.join("")) + mcp + `<div class="owned"></div>`;
+  const mcp = section_html("MCP servers", `<div class="mcp"></div>`, "mcp");
+  const jump = JUMPS.map(([id, name]) => `<button type="button" data-jump="${id}">${name}</button>`).join("");
+  return `<a class="back" href="/" data-go="/">← Chat</a><h1>Settings</h1><nav class="jump">${jump}</nav><div class="owned"></div>` + mine.replace("<section>", `<section id="s-prompts">`) + section_html("This browser", acts.join(""), "browser") + mcp;
 }
 function prompt_html(name, text, note) {
   const area = `<textarea name="${name}" rows="12" spellcheck="false">${esc(text)}</textarea>`;
@@ -4332,30 +4333,51 @@ var KEY = {
 };
 var VENDOR_KEY = { "claude-api": "anthropic", "openai-api": "openai" };
 var PICKS = ["pick", "compactor", "agents"];
-var GROUPS = [
-  ["Models", ["vendors", "models", "pick", "compactor", "compactor_context", "agents"]],
-  ["Server", ["site", "apple", "apns"]]
-];
+var JUMPS = [["roles", "Roles"], ["providers", "Providers"], ["profiles", "Profiles"], ["server", "Server"], ["prompts", "Prompts"], ["browser", "Browser"], ["mcp", "MCP"]];
+var KINDS = { sub: "subscription", api: "API key" };
 function settings_html(page) {
   Pick.learn(page.roster ?? {});
   const rows = new Map(page.settings.filter((r) => r.web && r.from !== "env").map((r) => [r.key, r]));
-  const group = ([title, keys]) => {
+  const group = (title, id, keys, more = "") => {
     const shown = keys.flatMap((k) => rows.get(k) ?? []);
-    return shown.length === 0 ? "" : section_html(title, shown.map((r) => setting_html(r, page.available)).join(""));
+    return shown.length === 0 && more === "" ? "" : section_html(title, shown.map(setting_html).join("") + more, id);
   };
-  const shown = page.keys.filter((k) => k.from !== "env");
-  const keys = shown.length === 0 ? "" : section_html("Keys", `<p class="sub">Kept in keys.json in the server's folder, readable by the server's user only, and never shown again, only their last characters.</p>` + shown.map(key_html).join(""));
+  const keys = page.keys.filter((k) => k.from !== "env");
+  const loose = keys.filter((k) => !Object.values(VENDOR_KEY).includes(k.name)).map(key_html).join("");
   const error = page.error === null ? "" : `<p class="why bad">${esc(page.error)}</p>`;
   const none = page.none === null ? "" : `<p class="why bad">${esc(page.none).replace(/`([^`]+)`/g, "<code>$1</code>")}.</p>`;
-  const save = `<div class="save"><p class="why"></p><button class="chip go"${page.error === null ? "" : " disabled"}>Save</button></div>`;
-  const head = `<p class="sub">The server's settings, in config.json in its folder.</p>`;
-  const profiles = page.profiles === null ? "" : section_html("Profiles", `<p class="sub">Ranked models: a chat on a profile runs on the first and falls back to the next when one is out.</p><div class="set profiles" data-key="profiles"><div class="field"></div><p class="err"></p></div>`);
-  return head + error + none + `<form class="settings" autocomplete="off">` + group(GROUPS[0]) + lists_html(page.fetched) + profiles + keys + group(GROUPS[1]) + save + `</form>`;
+  const save = `<div class="save"><p class="why"></p><p class="dirty">Unsaved changes</p><button class="chip go"${page.error === null ? "" : " disabled"}>Save</button></div>`;
+  const profiles = page.profiles === null ? "" : section_html("Profiles", `<p class="sub">Ranked models: a chat on a profile runs on the first and falls back to the next when one is out.</p><div class="set profiles" data-key="profiles"><div class="field"></div><p class="err"></p></div>`, "profiles");
+  const vendors = rows.get("vendors");
+  const models = rows.get("models");
+  const providers = vendors === undefined || models === undefined ? "" : section_html("Providers", providers_html(vendors, models, page, keys), "providers");
+  const head = `<p class="sub">Saved to config.json in the server's folder; keys to keys.json, readable by the server's user only and never shown again.</p>`;
+  return error + none + `<form class="settings" autocomplete="off">` + head + group("Roles", "roles", ["pick", "compactor", "compactor_context", "agents"]) + providers + profiles + group("Server", "server", ["site", "apple", "apns"], loose) + save + `</form>`;
 }
-function lists_html(fetched = {}) {
-  const when = Object.entries(fetched).map(([v, at]) => esc(v) + " " + esc(new Date(at).toLocaleString([], { dateStyle: "short", timeStyle: "short" }))).join(" · ");
-  const note = "Each signed-in subscription's models as its provider lists them, fetched daily" + (when === "" ? "." : ". Last: " + when);
-  return section_html("Model lists", `<div class="set lists"><p class="sub">${note}</p><div class="save"><p class="why"></p><button type="button" class="chip lists">Refresh now</button></div></div>`);
+function providers_html(vendors, models, page, keys) {
+  const on = list2(vendors.value);
+  const picked = list2(models.value);
+  const when = (at) => new Date(at).toLocaleString([], { dateStyle: "short", timeStyle: "short" });
+  const chip = (x) => `<label class="opt"><input type="checkbox" name="models" value="${esc(x)}"${picked.includes(x) ? " checked" : ""}><span>${esc(x)}</span></label>`;
+  const chips = (labels) => labels.length === 0 ? `<p class="none">No models listed yet.</p>` : `<div class="chips">${labels.map(chip).join("")}</div>`;
+  const bulk = `<span class="bulk"><button type="button" data-bulk="all">All</button><button type="button" data-bulk="none">None</button></span>`;
+  const card = (v) => {
+    const labels = Pick.models([v], LABELS, page.available).map(([, m]) => m.label);
+    const kind = KINDS[v.split("-").pop() ?? ""] ?? "";
+    const at = page.fetched?.[v];
+    const key = keys.find((k) => k.name === VENDOR_KEY[v]);
+    const meta = [kind, at === undefined ? "" : "listed " + when(at)].filter((x) => x !== "").map(esc).join(" · ");
+    const toggle = `<label class="tog"><input type="checkbox" name="vendors" value="${esc(v)}"${on.includes(v) ? " checked" : ""}><i></i><b>${esc(v)}</b></label>`;
+    return `<div class="vend" data-vendor="${esc(v)}"><div class="vhead">${toggle}<span class="meta">${meta}</span><span class="count"></span>${bulk}</div>${chips(labels)}${key === undefined ? "" : key_html(key)}</div>`;
+  };
+  const known = new Set(VENDORS.flatMap((v) => Pick.models([v], LABELS, page.available).map(([, m]) => m.label)));
+  const odd = [...new Set([...LABELS.filter((x) => !known.has(x) && picked.includes(x)), ...picked.filter((x) => !LABELS.includes(x))])];
+  const other = odd.length === 0 ? "" : `<div class="vend" data-vendor=""><div class="vhead"><b class="tog">Ticked, but no provider lists them</b><span class="count"></span>${bulk}</div>${chips(odd)}</div>`;
+  const stray = on.filter((v) => !VENDORS.includes(v)).map((v) => `<input type="checkbox" name="vendors" value="${esc(v)}" checked hidden>`).join("");
+  const meta = (r, name) => `<div class="set meta" data-key="${r.key}"><p class="from"><b>${name}</b> <code>${r.key}</code> · ${from_html(r).replace(/^<p class="from">|<\/p>$/g, "")}</p><p class="warn"></p><p class="err"></p></div>`;
+  const tools = `<div class="tools"><input type="search" class="find" placeholder="Filter models" aria-label="Filter models" spellcheck="false" autocapitalize="off"><button type="button" class="chip lists">Refresh lists</button></div><p class="why lists-why"></p>`;
+  const note = `<p class="sub">Switch a provider on to offer it; tick the models chats may pick. A model two providers offer is one choice: ticking it ticks it for both. Subscriptions' lists are fetched daily.</p>`;
+  return note + tools + meta(vendors, "Providers") + meta(models, "Models") + `<div class="vends">${VENDORS.map(card).join("")}${other}</div>${stray}`;
 }
 function offered(vendors, models, available) {
   return Pick.models(VENDORS.filter((v) => vendors.includes(v)), models, available).map(([v, m]) => v + ":" + m.label);
@@ -4374,20 +4396,14 @@ function profiles_html(profiles, offered) {
   const one = ([name, list], i) => `<div class="prof" data-i="${i}"><div class="name"><input class="pname" data-i="${i}" value="${esc(name)}" aria-label="Name" placeholder="Enter the profile name here" maxlength="60" spellcheck="false" autocapitalize="off"><button type="button" class="chip red pdel" data-i="${i}">Delete</button></div><ol>${list.map((m, j) => model(m, i, j)).join("")}</ol>${add(list, i)}</div>`;
   return profiles.map(one).join("") + `<button type="button" class="chip pnew">Add profile</button>`;
 }
-function setting_html(r, available) {
+function setting_html(r) {
   const [name, about] = SETTING[r.key] ?? [r.key, ""];
   const id = "set-" + r.key + (PICKS.includes(r.key) ? "-vendor" : "");
   const label = `<label for="${id}">${esc(name)}<small>${esc(about)} <code>${esc(r.key)}</code></small></label>`;
-  return `<div class="set" data-key="${esc(r.key)}">${label}<div class="field">${control_html(r, available)}</div>${from_html(r)}<p class="err"></p></div>`;
+  return `<div class="set" data-key="${esc(r.key)}">${label}<div class="field">${control_html(r)}</div>${from_html(r)}<p class="err"></p></div>`;
 }
-function control_html(r, available) {
+function control_html(r) {
   switch (r.key) {
-    case "vendors": {
-      return checks_html("vendors", VENDORS, list2(r.value), () => "") + `<p class="warn"></p>`;
-    }
-    case "models": {
-      return checks_html("models", LABELS, list2(r.value), (x) => Pick.models(VENDORS, [x], available).map(([vendor]) => vendor).join(" ") || "-");
-    }
     case "pick":
     case "compactor":
     case "agents": {
@@ -4405,11 +4421,6 @@ function list2(text) {
 function list_changed(was, now) {
   const same = was.length === now.length && was.every((x) => now.includes(x)) && now.every((x) => was.includes(x));
   return same ? null : [...was.filter((x) => now.includes(x)), ...now.filter((x) => !was.includes(x))];
-}
-function checks_html(name, all, on, vendor) {
-  const box = (x) => `<label class="opt" data-vendor="${esc(vendor(x))}"><input type="checkbox" name="${name}" value="${esc(x)}"${on.includes(x) ? " checked" : ""}> ${esc(x)}</label>`;
-  const odd = on.filter((x) => !all.includes(x));
-  return `<div class="opts">${all.map(box).join("")}${odd.map(box).join("")}</div>`;
 }
 function from_html(r) {
   const from = r.from === "file" ? "From config.json" : "Default" + (r.why === "" ? "" : ": " + esc(r.why));
@@ -4457,8 +4468,8 @@ function pick_mend(parts, models, profiles = [], available) {
   }
   return [vendor, m.label, Pick.efforts(m).includes(effort) ? effort : Pick.efforts(m)[0], m.speeds.includes(speed) ? speed : m.speeds[0]].join(":");
 }
-function section_html(title, body) {
-  return `<section><h2>${esc(title)}</h2>${body}</section>`;
+function section_html(title, body, id = "") {
+  return `<section${id === "" ? "" : ` id="s-${id}"`}><h2>${esc(title)}</h2>${body}</section>`;
 }
 function block_html(b) {
   switch (b.$) {
@@ -6400,6 +6411,7 @@ async function account() {
     account_prompt(form);
   });
   mcp_draw();
+  el.querySelectorAll("[data-jump]").forEach((b) => b.onclick = () => document.getElementById("s-" + (b.dataset.jump ?? ""))?.scrollIntoView({ behavior: "smooth", block: "start" }));
   el.querySelectorAll(".retry").forEach((retry) => retry.onclick = () => void account());
   $2("#account .out").onclick = () => void signout();
   const bell = document.querySelector("#account .notify");
@@ -6528,7 +6540,7 @@ function settings_draw(page) {
   const lists = form.querySelector("button.lists");
   if (lists !== null) {
     lists.onclick = async () => {
-      const why = lists.parentElement?.querySelector(".why");
+      const why = form.querySelector(".lists-why");
       lists.disabled = true;
       const out = await post("/api/model-lists", {});
       const failed = Array.isArray(out.failed) ? out.failed.map(String) : [];
@@ -6549,11 +6561,15 @@ function settings_draw(page) {
   const names = () => profs.map(([name]) => name.trim()).filter((name) => name !== "");
   const listed = (key) => {
     const boxes = [...form.querySelectorAll(`input[name="${key}"]`)];
-    return boxes.length === 0 ? list2(rows.get(key)?.value ?? "") : boxes.filter((b) => b.checked).map((b) => b.value);
+    return boxes.length === 0 ? list2(rows.get(key)?.value ?? "") : [...new Set(boxes.filter((b) => b.checked).map((b) => b.value))];
   };
   const picks = () => {
     const vendors = listed("vendors");
-    form.querySelectorAll(".opt[data-vendor]:not([data-vendor=''])").forEach((o) => o.hidden = !(o.dataset.vendor ?? "").split(" ").some((v) => vendors.includes(v)));
+    form.querySelectorAll(".vend").forEach((card) => {
+      const boxes = [...card.querySelectorAll("input[name=models]")];
+      card.classList.toggle("off", card.dataset.vendor !== "" && !vendors.includes(card.dataset.vendor ?? ""));
+      must(card.querySelector(".count"), "the card's count").textContent = boxes.filter((b) => b.checked).length + "/" + boxes.length;
+    });
     for (const key of PICKS) {
       const value = form.querySelector(`input[name="${key}"]`);
       const four = value?.parentElement?.querySelector(".four");
@@ -6569,15 +6585,33 @@ function settings_draw(page) {
       const typed = form.querySelector(`[name="key.${name}"]`)?.value.trim() ?? "";
       return key !== undefined && (key.from === "default" || unset.has("key." + name)) && typed === "";
     });
+    form.querySelectorAll(".vend").forEach((card) => card.classList.toggle("nokey", keyless.includes(card.dataset.vendor ?? "")));
     const warn = form.querySelector(".warn");
     if (warn !== null) {
       warn.textContent = keyless.length === 0 ? "" : keyless.join(" and ") + (keyless.length === 1 ? " has" : " have") + " no key set: its calls will fail till one is.";
     }
   };
+  const find = form.querySelector(".find");
+  find?.addEventListener("input", (ev) => {
+    ev.stopPropagation();
+    const q = find.value.trim().toLowerCase();
+    form.querySelectorAll(".vend .opt").forEach((o) => o.hidden = q !== "" && !(o.textContent ?? "").toLowerCase().includes(q));
+    form.querySelectorAll(".vend").forEach((card) => card.classList.toggle("miss", q !== "" && card.querySelector(".opt:not([hidden])") === null));
+  });
   form.oninput = (ev) => {
-    const el = ev.target.closest(".set");
+    const target = ev.target;
+    const listy = target.type === "checkbox" && (target.name === "vendors" || target.name === "models");
+    const el = listy ? form.querySelector(`.set[data-key="${target.name}"]`) : target.closest(".set");
     if (el === null) {
       return;
+    }
+    form.classList.add("dirty");
+    if (listy) {
+      form.querySelectorAll(`input[name="${target.name}"]`).forEach((b) => {
+        if (b.value === target.value) {
+          b.checked = target.checked;
+        }
+      });
     }
     unset.delete(el.dataset.key ?? "");
     el.classList.remove("unset");
@@ -6592,6 +6626,15 @@ function settings_draw(page) {
     }
   };
   form.onclick = (ev) => {
+    const bulk = ev.target.closest("[data-bulk]");
+    if (bulk !== null) {
+      const boxes = [...bulk.closest(".vend")?.querySelectorAll(".opt:not([hidden]) input[name=models]") ?? []];
+      boxes.forEach((b) => {
+        b.checked = bulk.dataset.bulk === "all";
+        b.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      return;
+    }
     const btn = ev.target.closest(".reset");
     if (btn === null) {
       return;
@@ -6599,7 +6642,8 @@ function settings_draw(page) {
     const el = must(btn.closest(".set"), "the reset's setting");
     const key = el.dataset.key ?? "";
     const r = rows.get(key);
-    el.querySelectorAll("input[type=checkbox]").forEach((b) => b.checked = list2(r?.def ?? "").includes(b.value));
+    form.classList.add("dirty");
+    form.querySelectorAll(`input[type=checkbox][name="${key}"]`).forEach((b) => b.checked = list2(r?.def ?? "").includes(b.value));
     el.querySelectorAll("input:not([type=checkbox]), textarea").forEach((i) => i.value = r?.def ?? "");
     picks();
     unset.add(key);

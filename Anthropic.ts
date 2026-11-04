@@ -37,6 +37,7 @@ type State = {
   speed  : string;
   error  : { type: string; message: string } | null;
   used   : { read: number; write: number; input: number } | null;
+  usage  : object;
 };
 
 type Message = { role: string; content: unknown[] };
@@ -159,6 +160,7 @@ export namespace Anthropic {
 
   export function usage(st: State, u: Usage): void {
     st.speed = u.speed === undefined ? st.speed : u.speed === "fast" ? "fast" : "slow";
+    st.usage = { ...st.usage, ...u };
   }
 
   export function delta(st: State, k: number, delta: Delta): void {
@@ -209,6 +211,7 @@ export namespace Anthropic {
     if (st.used !== null) {
       Agent.cached(ask, st.used.read, st.used.write, st.used.input);
     }
+    ask.spent?.(st.usage);
     const uses: Use[] = [];
     st.blocks.forEach((b, k) => {
       if (st.json[k] !== undefined) {
@@ -301,7 +304,7 @@ export namespace Anthropic {
     url     : "https://api.anthropic.com/v1/messages",
     headers : Anthropic.headers,
     body    : Anthropic.body,
-    start   : () => ({ blocks: [], json: [], stop: "", why: null, speed: "slow", error: null, used: null }),
+    start   : () => ({ blocks: [], json: [], stop: "", why: null, speed: "slow", error: null, used: null, usage: {} }),
     read    : Anthropic.read,
     begun   : (ev) => ev.type === "message_start",
     step    : Anthropic.step,

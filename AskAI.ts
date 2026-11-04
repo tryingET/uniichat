@@ -37,6 +37,7 @@ export type Ask = Pick & {
   talk?     : boolean;
   repick?   : () => Pick;
   used?     : (tokens: number) => void;
+  spent?    : (usage: object) => void;
   steer?    : Steer;
   limits?   : number;
   who?      : string;

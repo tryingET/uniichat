@@ -10,7 +10,8 @@ const RETRIES = 4;
 
 const SIGNATURE = 'chat:string "the chat so far, as one-line summaries", task:string "the compaction to do", source:string "what to compress, in <input> tags" -> summary:string "the one line"';
 
-type Sent = { blocks: string; by: string; text: string; ms: number; ok: boolean };
+type Tokens = { input: number; output: number; reasoning: number | null };
+type Sent = { blocks: string; by: string; text: string; ms: number; ok: boolean; tokens: Tokens | null };
 
 type Compacted = { line: string | null; by: string; tries: string[]; end: Answered | null };
 
@@ -30,10 +31,10 @@ export namespace Compact {
           throw new Error("compactor: stopped");
         }
         const blocks = Compact.blocks(req);
-        const ran = { by: "" };
+        const ran: { by: string; usage: object | null } = { by: "", usage: null };
         const at = Date.now();
         const end = await Memory.compact(mem, l, i, Memory.ask(mem, l, i, blocks, ran, req.chatPrompt[0]?.role === "system" ? req.chatPrompt[0].content : system));
-        sent.push({ blocks: blocks.map((b) => b.text).join(""), by: ran.by, text: end.text, ms: Date.now() - at, ok: end.ok });
+        sent.push({ blocks: blocks.map((b) => b.text).join(""), by: ran.by, text: end.text, ms: Date.now() - at, ok: end.ok, tokens: Compact.tokens(ran.usage) });
         if (!end.ok || end.text.trim() === "") {
           stop.end = end;
           throw new Error(end.text);
@@ -83,6 +84,18 @@ export namespace Compact {
       fs.writeFileSync(dir + "/system-" + sha + ".txt", rec.system, { mode: 0o600 });
     }
     const at = new Date().toISOString();
-    Memory.append(dir + "/" + at.slice(0, 10) + ".jsonl", [JSON.stringify({ ...rec, system: sha, at })]);
+    const key = rec.line === null ? null : createHash("sha256").update(rec.line).digest("hex").slice(0, 16);
+    Memory.append(dir + "/" + at.slice(0, 10) + ".jsonl", [JSON.stringify({ ...rec, system: sha, key, rev: process.env.UNII_REVISION ?? "dev", at })]);
+  }
+
+  export function tokens(usage: object | null): Tokens | null {
+    if (usage === null) {
+      return null;
+    }
+    const u = usage as Record<string, unknown>;
+    const n = (x: unknown) => (typeof x === "number" ? x : 0);
+    const of = (k: string) => (typeof u[k] === "object" && u[k] !== null ? (u[k] as Record<string, unknown>) : {});
+    const reasoning = of("output_tokens_details").reasoning_tokens ?? of("completion_tokens_details").reasoning_tokens;
+    return { input: n(u.input_tokens ?? u.prompt_tokens) + n(u.cache_read_input_tokens) + n(u.cache_creation_input_tokens), output: n(u.output_tokens ?? u.completion_tokens), reasoning: typeof reasoning === "number" ? reasoning : null };
   }
 }

@@ -723,13 +723,13 @@ export namespace Memory {
     parts.forEach(({ l, i }) => mem.made?.(l, i));
   }
 
-  export function ask(mem: Memory, l: number, i: number, blocks: Block[], ran: { by: string }, system: string): Call {
+  export function ask(mem: Memory, l: number, i: number, blocks: Block[], ran: { by: string; usage: object | null }, system: string): Call {
     const own = Memory.served(mem, l, i) === "compactor";
     const repick = () => Pick.ask(config.COMPACTOR);
     const told: { again: Again | null } = { again: null };
     const pick = repick();
     ran.by = Pick.label(Pick.named(pick));
-    return AskAI.ask({ ...mem.share(), system, ...pick, blocks, patient: true, repick, yields: own ? undefined : mem.dir, who: own ? "compactor" : "import" }, (ev) => {
+    return AskAI.ask({ ...mem.share(), system, ...pick, blocks, patient: true, repick, spent: (usage) => (ran.usage = usage), yields: own ? undefined : mem.dir, who: own ? "compactor" : "import" }, (ev) => {
       if (ev.$ === "Run") {
         ran.by = Pick.label(ev.run);
       }

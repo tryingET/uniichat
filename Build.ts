@@ -39,4 +39,5 @@ if (!fs.existsSync(exe)) {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 }
-run(["bun", "build", "--compile", "--target=" + target, "Cli.ts", exe, "--outfile", out]);
+const rev = Bun.spawnSync(["git", "describe", "--always", "--dirty"], { cwd: HERE }).stdout.toString().trim();
+run(["bun", "build", "--compile", "--target=" + target, "--define", "process.env.UNII_REVISION=" + JSON.stringify(JSON.stringify(rev)), "Cli.ts", exe, "--outfile", out]);

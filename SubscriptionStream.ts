@@ -303,6 +303,7 @@ export function step(st: State, ask: Ask): Step {
   try {
     const result = finish(st);
     if ((result.stop === "done" || result.stop === "tools") && st.usage) {
+      ask.spent?.(st.usage);
       const input = st.usage.input_tokens ?? st.usage.prompt_tokens;
       if (typeof input === "number" && Number.isFinite(input) && input >= 0) {
         const read = st.usage.cache_read_input_tokens, write = st.usage.cache_creation_input_tokens;

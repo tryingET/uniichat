@@ -143,6 +143,9 @@ export namespace OpenAI {
   export function step(st: State, ask: Ask): Step {
     const res: Res = st.res ?? { status: "failed", error: st.error, output: [] };
     const u = res.usage;
+    if (u !== undefined) {
+      ask.spent?.(u);
+    }
     if (typeof u?.input_tokens === "number") {
       const read = u.input_tokens_details?.cached_tokens ?? 0;
       const told = u.input_tokens_details?.cache_write_tokens;

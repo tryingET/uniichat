@@ -28,7 +28,7 @@ const LIMITS = new Map<string, number>();
 
 const PARKED = new Set<{ vendor: Vendor; poke: () => void }>();
 
-const USAGE: Partial<Record<Vendor, () => Promise<boolean | null>>> = { "openai-sub": () => ChatGPT.clear() };
+const USAGE: Partial<Record<Vendor, () => Promise<boolean | null>>> = { "openai-sub": () => ChatGPT.ready() };
 const POLLS = new Map<Vendor, Timer>();
 
 export namespace Limit {

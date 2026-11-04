@@ -32,6 +32,7 @@ const HAIKU : Model = { label: "haiku-5.5",  id: "claude-haiku-5-5",  speeds: ["
 const OPENAI: Model[] = [
   { label: "gpt-6-luna",  id: "gpt-6-luna",  speeds: ["slow", "fast"], window: 272e3 },
   { label: "gpt-6.1-sol", id: "gpt-6.1-sol", speeds: ["slow", "fast"], window: 500e3 },
+  { label: "gpt-6.1-terra", id: "gpt-6.1-terra", speeds: ["slow", "fast"], window: 500e3 },
   { label: "gpt-6-astra", id: "gpt-6-astra", speeds: ["slow", "fast", "ultrafast"], window: 272e3 },
 ];
 

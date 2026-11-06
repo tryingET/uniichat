@@ -1,4 +1,5 @@
 import type { Vendor } from "../../AskAI.ts";
+import type { ChatGPTAccount } from "../../ChatGPTAccounts.ts";
 import * as Call from "../../Call.ts";
 import * as Md from "../../Md.ts";
 import { LABELS, Pick, VENDORS, type Available } from "../../Pick.ts";
@@ -238,7 +239,8 @@ function providers_html(vendors: Row, models: Row, page: Page, keys: Key[]): str
     const key = keys.find((k) => k.name === VENDOR_KEY[v]);
     const meta = [kind, at === undefined ? "" : "listed " + when(at)].filter((x) => x !== "").map(esc).join(" · ");
     const toggle = `<label class="tog"><input type="checkbox" name="vendors" value="${esc(v)}"${on.includes(v) ? " checked" : ""}><i></i><b>${esc(v)}</b></label>`;
-    return `<div class="vend" data-vendor="${esc(v)}"><div class="vhead">${toggle}<span class="meta">${meta}</span><span class="count"></span>${bulk}</div>${chips(labels)}${key === undefined ? "" : key_html(key)}</div>`;
+    const accounts = v === "openai-sub" ? `<p class="sub">${(page.accounts ?? []).map((a) => esc(a.label)).join("<br>") || "No ChatGPT accounts connected."}<br>Choose an account per role above, or use automatic switching. Add another with <code>unii serve chatgpt login 2</code>.</p>` : "";
+    return `<div class="vend" data-vendor="${esc(v)}"><div class="vhead">${toggle}<span class="meta">${meta}</span><span class="count"></span>${bulk}</div>${accounts}${chips(labels)}${key === undefined ? "" : key_html(key)}</div>`;
   };
   const known = new Set(VENDORS.flatMap((v) => Pick.models([v], LABELS, page.available).map(([, m]) => m.label)));
   const odd = [...new Set([...LABELS.filter((x) => !known.has(x) && picked.includes(x)), ...picked.filter((x) => !LABELS.includes(x))])];
@@ -250,19 +252,24 @@ function providers_html(vendors: Row, models: Row, page: Page, keys: Key[]): str
   return note + tools + meta(vendors, "Providers") + meta(models, "Models") + `<div class="vends">${VENDORS.map(card).join("")}${other}</div>${stray}`;
 }
 
-export function offered(vendors: string[], models: string[], available?: Available): string[] {
-  return Pick.models(VENDORS.filter((v) => vendors.includes(v)), models, available).map(([v, m]) => v + ":" + m.label);
+export function offered(vendors: string[], models: string[], available?: Available, accounts: ChatGPTAccount[] = []): string[] {
+  return Pick.models(VENDORS.filter((v) => vendors.includes(v)), models, available).flatMap(([v, m]) => [v + ":" + m.label, ...(v === "openai-sub" ? accounts.filter((a) => a.connected).map((a) => [v, m.label, Pick.efforts(m).includes("medium") ? "medium" : Pick.efforts(m)[0], "slow", a.id].join(":")) : [])]);
 }
 
-export function profiles_html(profiles: Array<[string, string[]]>, offered: string[]): string {
+export function profiles_html(profiles: Array<[string, string[]]>, offered: string[], accounts: ChatGPTAccount[] = []): string {
+  const account = (m: string) => {
+    const id = Number(m.split(":")[4]);
+    return id ? accounts.find((a) => a.id === id)?.label ?? "Account " + id + " (not connected)" : "";
+  };
+  const identity = (m: string) => m.split(":").slice(0, 2).join(":") + ":" + (m.split(":")[4] ?? "");
   const model = (m: string, i: number, j: number) => {
     const [vendor = "", label = m, ...rest] = m.split(":");
-    const more = rest.length === 0 ? "" : ` <small>${esc(rest.join(" · "))}</small>`;
+    const more = rest.length === 0 ? "" : ` <small>${esc([...rest.slice(0, 2), account(m)].filter(Boolean).join(" · "))}</small>`;
     return `<li data-j="${j}"><button type="button" class="grip" data-i="${i}" data-j="${j}" aria-label="Move ${esc(label)}">⠿</button><span>${esc(label)}${more} <small>${esc(vendor)}</small></span><button type="button" class="out" data-i="${i}" data-j="${j}" aria-label="Remove ${esc(label)}">×</button></li>`;
   };
   const add = (list: string[], i: number) => {
-    const left = offered.filter((m) => !list.some((x) => x.split(":").slice(0, 2).join(":") === m));
-    const groups = [...new Set(left.map((m) => m.split(":")[0]))].map((v) => `<optgroup label="${esc(v)}">${left.filter((m) => m.startsWith(v + ":")).map((m) => `<option value="${esc(m)}">${esc(m.split(":")[1])}</option>`).join("")}</optgroup>`);
+    const left = offered.filter((m) => !list.some((x) => identity(x) === identity(m)));
+    const groups = [...new Set(left.map((m) => m.split(":")[0]))].map((v) => `<optgroup label="${esc(v)}">${left.filter((m) => m.startsWith(v + ":")).map((m) => `<option value="${esc(m)}">${esc(m.split(":")[1] + (account(m) ? " · " + account(m) : ""))}</option>`).join("")}</optgroup>`);
     return left.length === 0 ? "" : `<select class="add" data-i="${i}" aria-label="Add model"><option value="">Add model</option>${groups.join("")}</select>`;
   };
   const one = ([name, list]: [string, string[]], i: number) =>
@@ -319,23 +326,24 @@ function key_html(k: Key): string {
   return `<div class="set key" data-key="key.${esc(k.name)}">${label}<div class="field">${field}</div><p class="from">${from}${reset}</p><p class="err"></p></div>`;
 }
 
-export function picks_html(key: string, vendors: string[], models: string[], value: string, none: string | null, profiles: string[] = [], available?: Available): string {
-  const [vendor = "", model = "", effort = "", speed = ""] = value === "" ? [] : value.split(":");
+export function picks_html(key: string, vendors: string[], models: string[], value: string, none: string | null, profiles: string[] = [], available?: Available, accounts: ChatGPTAccount[] = []): string {
+  const [vendor = "", model = "", effort = "", speed = "", account = ""] = value === "" ? [] : value.split(":");
   const known = (VENDORS as string[]).includes(vendor);
   const offered = (VENDORS as string[]).filter((v) => vendors.includes(v));
   const labels = known ? Pick.models([vendor as Vendor], models, available).map(([, m]) => m.label) : [];
   const speeds = known ? Pick.model(vendor as Vendor, model)?.speeds ?? [] : [];
-  const select = (part: string, name: string, all: string[], on: string, first: string | null) => {
+  const select = (part: string, name: string, all: string[], on: string, first: string | null, labels: Record<string, string> = {}) => {
     const opts: Array<[string, string]> = [...(first === null ? [] : [["", first] as [string, string]]), ...(all.includes(on) || (on === "" && first !== null) ? [] : [[on, on + " (not offered)"] as [string, string]]), ...all.map((x): [string, string] => [x, x])];
-    const items = opts.map(([v, text]) => `<option value="${esc(v)}"${v === on ? " selected" : ""}>${esc(text)}</option>`).join("");
+    const items = opts.map(([v, text]) => `<option value="${esc(v)}"${v === on ? " selected" : ""}${part === "account" && v !== "" && !accounts.some((a) => String(a.id) === v && a.connected) ? " disabled" : ""}>${esc(labels[v] ?? text)}</option>`).join("");
     return `<select id="set-${key}-${part}" name="${key}.${part}" aria-label="${name}">${items}</select>`;
   };
   const head = select("vendor", "Vendor", [...offered, ...profiles], vendor, none);
-  return vendor === "" || profiles.includes(vendor) ? head : head + select("model", "Model", labels, model, null) + select("effort", "Effort", Pick.efforts(known ? Pick.model(vendor as Vendor, model) : undefined), effort, null) + select("speed", "Speed", speeds, speed, null);
+  const account_pick = vendor === "openai-sub" ? select("account", "ChatGPT account", accounts.map((a) => String(a.id)), account, "Automatic (switch accounts)", Object.fromEntries(accounts.map((a) => [String(a.id), a.label]))) : "";
+  return vendor === "" || profiles.includes(vendor) ? head : head + select("model", "Model", labels, model, null) + select("effort", "Effort", Pick.efforts(known ? Pick.model(vendor as Vendor, model) : undefined), effort, null) + select("speed", "Speed", speeds, speed, null) + account_pick;
 }
 
 export function pick_mend(parts: string[], models: string[], profiles: string[] = [], available?: Available): string {
-  const [vendor = "", model = "", effort = "", speed = ""] = parts;
+  const [vendor = "", model = "", effort = "", speed = "", account = ""] = parts;
   if (profiles.includes(vendor)) {
     return vendor;
   }
@@ -347,7 +355,7 @@ export function pick_mend(parts: string[], models: string[], profiles: string[] 
   if (m === undefined) {
     return parts.join(":");
   }
-  return [vendor, m.label, Pick.efforts(m).includes(effort) ? effort : Pick.efforts(m)[0], m.speeds.includes(speed) ? speed : m.speeds[0]].join(":");
+  return [vendor, m.label, Pick.efforts(m).includes(effort) ? effort : Pick.efforts(m)[0], m.speeds.includes(speed) ? speed : m.speeds[0], ...(vendor === "openai-sub" && account !== "" ? [account] : [])].join(":");
 }
 
 function section_html(title: string, body: string, id = ""): string {

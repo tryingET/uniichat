@@ -10,6 +10,7 @@ import { SubscriptionRoster } from "./SubscriptionRoster.ts";
 import { SUBSCRIPTION_VENDORS } from "./SubscriptionPicks.ts";
 import { SubscriptionAuth } from "./SubscriptionAuth.ts";
 import { SubscriptionModels } from "./SubscriptionModels.ts";
+import { ChatGPTAccounts } from "./ChatGPTAccounts.ts";
 
 type ServerOnly = "runs a command";
 
@@ -95,7 +96,7 @@ export const CLAUDE     = config_path(config_get("claude", ""));
 const ENV_KEYS: Record<string, string> = Object.fromEntries(Object.entries(VARS).map(([name, v]) => [name, config_key(v)]));
 export const KEYS: Record<string, string> = config_keys(keys_read());
 
-let FOLLOWED = config_usable().join() + JSON.stringify(config_available());
+let FOLLOWED = config_usable().join() + JSON.stringify(config_available()) + JSON.stringify(ChatGPTAccounts.list(CHATGPT));
 
 let KEPT: string[] = [];
 
@@ -215,7 +216,7 @@ function config_usable(): Vendor[] {
     return at;
   };
   const claude = field(CLAUDE_SUB + "/.credentials.json", "claudeAiOauth") != null || field(CLAUDE_SUB + "/.claude.json", "oauthAccount") != null;
-  const chatgpt = typeof field(CHATGPT, "tokens", "refresh_token") === "string";
+  const chatgpt = ChatGPTAccounts.list(CHATGPT).some((a) => a.connected);
   const has: Record<Vendor, boolean> = { "claude-sub": claude, "openai-sub": chatgpt, "claude-api": KEYS.anthropic !== "", "openai-api": KEYS.openai !== "",
     "xai-sub": SubscriptionAuth.status(DIR, "xai-sub").connected,
     "opencode-go": SubscriptionAuth.status(DIR, "opencode-go").connected,
@@ -231,7 +232,7 @@ export function config_none(): string | null {
 
 export function config_follow(): boolean {
   const available = config_available();
-  const now = config_usable().join() + JSON.stringify(available);
+  const now = config_usable().join() + JSON.stringify(available) + JSON.stringify(ChatGPTAccounts.list(CHATGPT));
   if (now === FOLLOWED) {
     return false;
   }
@@ -338,6 +339,7 @@ export function config_make(file: Record<string, unknown>): Made {
     models  : config_value(file, "models").split(",").map((m) => m.trim()),
     available,
     roster  : config_roster(),
+    accounts: ChatGPTAccounts.list(CHATGPT),
   };
   offer.profiles = config_profiles(file, offer);
   const agents = config_value(file, "agents");
@@ -360,8 +362,9 @@ function config_context(text: string): number {
 }
 
 function config_run(key: string, text: string, offer: Offer): Pick {
-  const [vendor, model, effort, speed] = text.split(":");
-  const pick = Pick.read(Object.hasOwn(offer.profiles ?? {}, text) ? { profile: text, effort: "medium", speed: "slow" } : { vendor, model, effort, speed }, offer, false);
+  const parts = text.split(":");
+  const [vendor, model, effort, speed, account] = parts;
+  const pick = parts.length > 5 ? null : Pick.read(Object.hasOwn(offer.profiles ?? {}, text) ? { profile: text, effort: "medium", speed: "slow" } : { vendor, model, effort, speed, ...(account === undefined ? {} : { account: /^[1-9]\d*$/.test(account) ? Number(account) : NaN }) }, offer, false);
   if (pick === null) {
     throw new Error("config: " + key + " is no vendor:model:effort:speed or profile offered here: " + text);
   }
@@ -388,13 +391,13 @@ function config_profiles(file: Record<string, unknown>, offer: Offer): Record<st
 
 function config_fall(name: string, f: string, offer: Offer): Fall {
   const parts = f.split(":");
-  const [vendor, label, effort, speed] = parts as [Vendor, string, string?, string?];
+  const [vendor, label, effort, speed, account] = parts as [Vendor, string, string?, string?, string?];
   const model = offer.vendors.includes(vendor) && offer.models.includes(label) ? Pick.model(vendor, label) : undefined;
-  const bad = parts.length > 4 || (effort !== undefined && !Pick.efforts(model).includes(effort)) || (speed !== undefined && !model?.speeds.includes(speed));
+  const bad = parts.length > 5 || (effort !== undefined && !Pick.efforts(model).includes(effort)) || (speed !== undefined && !model?.speeds.includes(speed)) || (account !== undefined && (vendor !== "openai-sub" || !/^[1-9]\d*$/.test(account) || !Number.isSafeInteger(Number(account))));
   if (model === undefined || bad) {
     throw new Error("config: profile " + JSON.stringify(name) + " has no vendor:model[:effort[:speed]] offered here: " + f);
   }
-  return { vendor, model, effort, speed };
+  return { vendor, model, effort, speed, ...(account === undefined ? {} : { account: Number(account) }) };
 }
 
 function config_vendors(text: string): Vendor[] {
@@ -499,6 +502,7 @@ export function config_reload(): void {
   OFFER.models = made.offer.models;
   OFFER.available = made.offer.available;
   OFFER.roster = made.offer.roster;
+  OFFER.accounts = made.offer.accounts;
   OFFER.profiles = made.offer.profiles;
   PICK = made.pick;
   COMPACTOR = made.compactor;

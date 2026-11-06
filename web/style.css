@@ -428,6 +428,7 @@ header > .imping { display: flex; flex-direction: column; justify-content: cente
 .set .field textarea { display: block; height: auto; padding: 9px 10px; line-height: 20px; resize: vertical; }
 .set .field :where(input, select, textarea):focus { outline: 2px solid var(--ink); outline-offset: -1px; }
 .set .four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.set .four select[name$=".account"] { grid-column: 1 / -1; }
 .set .from { margin: 6px 0 0; font-size: 13px; color: var(--mid); }
 .set.unset .from { color: var(--ink); }
 .set .reset { margin-left: 4px; padding: 0; background: none; font: inherit; color: var(--ink); text-decoration: underline; cursor: pointer; }

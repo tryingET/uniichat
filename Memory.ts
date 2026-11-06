@@ -729,7 +729,7 @@ export namespace Memory {
     const told: { again: Again | null } = { again: null };
     const pick = repick();
     ran.by = Pick.label(Pick.named(pick));
-    return AskAI.ask({ ...mem.share(), system, ...pick, blocks, patient: true, repick, spent: (usage) => (ran.usage = usage), yields: own ? undefined : mem.dir, who: own ? "compactor" : "import" }, (ev) => {
+    return AskAI.ask({ ...mem.share(), system, ...pick, account: pick.account, blocks, patient: true, repick, spent: (usage) => (ran.usage = usage), yields: own ? undefined : mem.dir, who: own ? "compactor" : "import" }, (ev) => {
       if (ev.$ === "Run") {
         ran.by = Pick.label(ev.run);
       }

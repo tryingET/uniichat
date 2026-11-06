@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { Ask } from "./AskAI.ts";
+import type { Ask, Event as AskEvent } from "./AskAI.ts";
+import { ChatGPTAccounts } from "./ChatGPTAccounts.ts";
 import type { Emit, Item, Refusal, Tool, Wire } from "./Agent.ts";
 import { OpenAI, type Event, type Output, type State } from "./OpenAI.ts";
 import * as config from "./Config.ts";
@@ -86,18 +87,20 @@ export namespace ChatGPT {
   }
 
   export function account(n: number): string {
-    return n <= 1 ? config.CHATGPT : config.CHATGPT.replace(/(\.json)?$/, "-" + n + ".json");
+    return ChatGPTAccounts.file(config.CHATGPT, n);
   }
 
   export function accounts(): string[] {
-    const dir = path.dirname(config.CHATGPT);
-    const more = fs.existsSync(dir) ? fs.readdirSync(dir).map((f) => /-(\d+)\.json$/.exec(f)?.[1]).filter((n) => n !== undefined).map(Number).sort((a, b) => a - b).map(ChatGPT.account) : [];
-    return [config.CHATGPT, ...more].filter((f, k, all) => fs.existsSync(f) && all.indexOf(f) === k);
+    return ChatGPTAccounts.list(config.CHATGPT).filter((a) => a.connected).map((a) => ChatGPT.account(a.id));
   }
 
   export function named(file: string): string {
-    const auth = ChatGPT.load(file);
-    return auth === null ? path.basename(file) : ChatGPT.who(auth);
+    try {
+      const auth = ChatGPT.load(file);
+      return auth === null ? path.basename(file) : ChatGPT.who(auth);
+    } catch {
+      return path.basename(file);
+    }
   }
 
   export function got(x: unknown): Got {
@@ -118,13 +121,6 @@ export namespace ChatGPT {
   export function due(auth: Auth, now = Date.now()): boolean {
     const exp = ChatGPT.claims(auth.tokens.access_token).exp;
     return typeof exp === "number" ? exp * 1000 <= now + EARLY : !(Date.parse(auth.last_refresh) > now - OLD);
-  }
-
-  export async function token(refused?: string): Promise<string> {
-    if (SUSPECT !== null) {
-      await ChatGPT.recheck();
-    }
-    return ChatGPT.token_of(FILE, refused);
   }
 
   export async function token_of(file: string, refused?: string): Promise<string> {
@@ -164,7 +160,10 @@ export namespace ChatGPT {
   }
 
   // whether any account's usage limit cleared, moving to the first that did
-  export async function ready(): Promise<boolean | null> {
+  export async function ready(account?: number): Promise<boolean | null> {
+    if (account !== undefined) {
+      return ChatGPT.clear(ChatGPT.account(account)).catch(() => null);
+    }
     let told: boolean | null = false;
     for (const f of ChatGPT.accounts()) {
       const ok = await ChatGPT.clear(f).catch(() => null);
@@ -312,8 +311,8 @@ export namespace ChatGPT {
       return;
     }
     if (args.includes("status")) {
-      const all = ChatGPT.accounts();
-      console.log(all.length === 0 ? "Not signed in to ChatGPT." : all.map((f, k) => "Account " + (k + 1) + ": signed in to ChatGPT as " + ChatGPT.named(f) + "; tokens in " + f + ".").join("\n"));
+      const all = ChatGPTAccounts.list(config.CHATGPT).filter((a) => a.connected);
+      console.log(all.length === 0 ? "Not signed in to ChatGPT." : all.map((a) => "Account " + a.id + ": signed in to ChatGPT as " + ChatGPT.named(ChatGPT.account(a.id)) + "; tokens in " + ChatGPT.account(a.id) + ".").join("\n"));
       process.exitCode = all.length === 0 ? 1 : 0;
       return;
     }
@@ -354,10 +353,10 @@ export namespace ChatGPT {
     }) });
   }
 
-  export function headers(token: string): Record<string, string> {
+  export function headers(token: string, file = FILE): Record<string, string> {
     return {
       authorization        : "Bearer " + token,
-      "chatgpt-account-id" : ChatGPT.claims(token)[CLAIMS]?.chatgpt_account_id ?? ChatGPT.load()?.tokens.account_id ?? "",
+      "chatgpt-account-id" : ChatGPT.claims(token)[CLAIMS]?.chatgpt_account_id ?? ChatGPT.load(file)?.tokens.account_id ?? "",
       "openai-beta"        : "responses=experimental",
       "content-type"       : "application/json",
       accept               : "text/event-stream",
@@ -390,7 +389,7 @@ export namespace ChatGPT {
     return { why, say: "the ChatGPT plan" + plan + " this server runs on " + LIMITS[kind] };
   }
 
-  export function reset(res: Response, text: string): number | null {
+  export function reset(res: Response, text: string, file = FILE, automatic = true): number | null {
     const err = get(ChatGPT.json(text), "error") ?? {};
     if (res.status !== 429 || ![get(err, "type"), get(err, "code")].includes("usage_limit_reached")) {
       return null;
@@ -403,9 +402,13 @@ export namespace ChatGPT {
     }
     const now = Date.now();
     LIMITED.forEach((until, f) => until <= now && LIMITED.delete(f));
-    const other = ChatGPT.accounts().some((f) => f !== FILE && !LIMITED.has(f));
+    LIMITED.set(file, at);
+    if (!automatic) {
+      return at;
+    }
+    const other = ChatGPT.accounts().some((f) => f !== file && !LIMITED.has(f));
     if (!other) {
-      return Math.min(at, ...[...LIMITED].filter(([f]) => f !== FILE).map(([, until]) => until));
+      return Math.min(at, ...[...LIMITED].filter(([f]) => f !== file).map(([, until]) => until));
     }
     SUSPECT = at;
     return now + SWITCH;
@@ -415,28 +418,59 @@ export namespace ChatGPT {
   // /status (codex-rs backend-client: GET wham/usage, its rate_limit's
   // `allowed`); null: can't tell
   export async function clear(file = FILE): Promise<boolean | null> {
-    const { authorization, "chatgpt-account-id": account, originator } = ChatGPT.headers(await ChatGPT.token_of(file));
+    const { authorization, "chatgpt-account-id": account, originator } = ChatGPT.headers(await ChatGPT.token_of(file), file);
     const res = await fetch(USAGE, { headers: { authorization, "chatgpt-account-id": account, originator }, signal: AbortSignal.timeout(REQUEST) });
     const limit = res.ok ? get(ChatGPT.json(await res.text()), "rate_limit") : null;
     const allowed = get(limit, "allowed");
     return typeof allowed === "boolean" ? allowed && get(limit, "limit_reached") !== true : null;
   }
 
-  export const wire: Wire<Sub, Event> = {
-    key     : "",
-    idle    : 1200e3,
-    url     : RESPONSES,
-    auth    : (refused) => ChatGPT.token(refused),
-    // the backend routes its cache by the session-id header
-    headers : (token, ask) => ({ ...ChatGPT.headers(token), "session-id": OpenAI.session(ask), "thread-id": OpenAI.session(ask) }),
-    body    : (ask, items, tools, max) => ChatGPT.body(ask, items, tools, max),
-    start   : (ask) => ({ ...OpenAI.wire.start(ask), items: [] }),
-    read    : (st, ev, on) => ChatGPT.read(st, ev, on),
-    begun   : (ev) => ev.type === "response.output_item.added",
-    step    : (st, ask) => ({ ...OpenAI.step(st, ask), note: "" }),
-    refusal : (res, text) => ChatGPT.refusal(res, text),
-    reset   : (res, text) => ChatGPT.reset(res, text),
-  };
+  export function wire(ask: Ask, on: (ev: AskEvent) => void): Wire<Sub, Event> {
+    let file = ask.account === undefined ? FILE : ChatGPT.account(ask.account);
+    let account: number | undefined;
+    let reported = false;
+    const report = () => {
+      if (!reported) {
+        reported = true;
+        on({ $: "Run", run: { vendor: ask.vendor, model: ask.model, effort: ask.effort, speed: ask.speed, account }, from: null, why: "" });
+      }
+    };
+    return {
+      key: "",
+      idle: 1200e3,
+      url: RESPONSES,
+      auth: async (refused) => {
+        if (ask.account === undefined) {
+          if (SUSPECT !== null || !ChatGPT.accounts().includes(FILE)) {
+            await ChatGPT.recheck();
+          }
+          file = FILE;
+        }
+        const token = await ChatGPT.token_of(file, refused);
+        account = ChatGPTAccounts.list(config.CHATGPT).find((a) => a.connected && ChatGPT.account(a.id) === file)?.id;
+        if (account === undefined) {
+          throw new Error("The selected ChatGPT account is no longer connected.");
+        }
+        reported = false;
+        return token;
+      },
+      headers: (token, request) => ({ ...ChatGPT.headers(token, file), "session-id": OpenAI.session(request), "thread-id": OpenAI.session(request) }),
+      reset: (res, text) => ChatGPT.reset(res, text, file, ask.account === undefined),
+      body: (ask, items, tools, max) => ChatGPT.body(ask, items, tools, max),
+      start: (ask) => ({ ...OpenAI.wire.start(ask), items: [] }),
+      read: (st, ev, emit) => ChatGPT.read(st, ev, (kind, text, fresh) => {
+        if (kind === "unii" || kind === "tool") report();
+        emit(kind, text, fresh);
+      }),
+      begun: (ev) => ev.type === "response.output_item.added",
+      step: (st, ask) => {
+        const step = { ...OpenAI.step(st, ask), note: "" };
+        if (step.entries.some((e) => e.kind === "unii" || e.kind === "tool")) report();
+        return step;
+      },
+      refusal: (res, text) => ChatGPT.refusal(res, text),
+    };
+  }
 
 }
 

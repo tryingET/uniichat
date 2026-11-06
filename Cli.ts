@@ -134,6 +134,9 @@ function not_by_sudo(cmd: string): void {
 
 function plan(name: "claude" | "chatgpt", about: string): Cmd {
   const cli = async (word: string, n?: string) => {
+    if (n !== undefined && (!Number.isSafeInteger(Number(n)) || Number(n) < 1)) {
+      return fail("An account number must be a positive safe integer.");
+    }
     const mod = name === "claude" ? (await import("./ClaudeSub.ts")).ClaudeSub : (await import("./ChatGPT.ts")).ChatGPT;
     await mod.cli(n === undefined ? [word] : [word, n]).catch((err: unknown) => fail(err_why(err)));
   };

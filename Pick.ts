@@ -1,4 +1,5 @@
 import type { Vendor } from "./AskAI.ts";
+import type { ChatGPTAccount } from "./ChatGPTAccounts.ts";
 import { get } from "./Json.ts";
 import { SUBSCRIPTION_VENDORS, SubscriptionPicks } from "./SubscriptionPicks.ts";
 
@@ -8,6 +9,7 @@ export type Pick = {
   effort   : string;
   speed    : string;
   profile? : string;
+  account? : number;
 };
 
 export type Move = "next" | "prev" | "model" | "up" | "down" | "effort" | "speed";
@@ -15,9 +17,9 @@ export type Move = "next" | "prev" | "model" | "up" | "down" | "effort" | "speed
 export type Model = { label: string; id: string; speeds: string[]; window: number; efforts?: string[] };
 
 export type Available = Partial<Record<Vendor, string[]>>;
-export type Offer = { vendors: Vendor[]; models: string[]; profiles?: Record<string, Fall[]>; available?: Available; roster?: Roster };
+export type Offer = { vendors: Vendor[]; models: string[]; profiles?: Record<string, Fall[]>; available?: Available; roster?: Roster; accounts?: ChatGPTAccount[] };
 
-export type Fall = { vendor: Vendor; model: Model; effort?: string; speed?: string };
+export type Fall = { vendor: Vendor; model: Model; effort?: string; speed?: string; account?: number };
 
 export const VENDORS: Vendor[] = ["claude-api", "openai-api", "openai-sub", "claude-sub", ...SUBSCRIPTION_VENDORS];
 
@@ -77,7 +79,8 @@ export namespace Pick {
     const below = SPEEDS.slice(0, SPEEDS.indexOf(pick.speed) + 1);
     const speed = below.filter((s) => model.speeds.includes(s)).pop() ?? "slow";
     const effort = efforts(model).includes(pick.effort) ? pick.effort : efforts(model)[0];
-    return { ...pick, vendor, model: model.label, speed, effort };
+    const { account, ...rest } = pick;
+    return { ...rest, vendor, model: model.label, speed, effort, ...(vendor === "openai-sub" && account !== undefined ? { account } : {}) };
   }
 
   export function efforts(model?: Model): string[] { return model?.efforts ?? EFFORTS; }
@@ -92,8 +95,11 @@ export namespace Pick {
 
   export function options(pick: Pick, move: Move, offer: Offer): Array<[string, Pick]> {
     const speeds = Pick.model(pick.vendor, pick.model)?.speeds ?? [];
-    const { profile: _, ...plain } = pick;
-    const all = Pick.models(offer.vendors, offer.models, offer.available).map(([v, m]): [string, Pick] => [m.label, Pick.on(plain, v, m)]);
+    const { profile: _, account: __, ...plain } = pick;
+    const all = Pick.models(offer.vendors, offer.models, offer.available).flatMap(([v, m]): Array<[string, Pick]> => {
+      const on = Pick.on(plain, v, m);
+      return [[m.label, on], ...(v === "openai-sub" ? (offer.accounts ?? []).filter((a) => a.connected).map((a): [string, Pick] => [m.label + " (account " + a.id + ")", { ...on, account: a.id }]) : [])];
+    });
     const profiles = Object.keys(offer.profiles ?? {}).flatMap((name): [string, Pick][] => {
       const on = Pick.profile(name, offer, pick.effort, pick.speed);
       return on === null ? [] : [[name, on]];
@@ -123,7 +129,7 @@ export namespace Pick {
     const ends = move === "up" || move === "down";
     const next = ends ? Math.max(0, Math.min(n - 1, at + d)) : (at + d + n) % n;
     const mine = ([, p]: [string, Pick]) => p.profile === undefined && p.vendor === pick.vendor;
-    const same = list.filter(([part, p]) => part === to || (p.profile === undefined && p.vendor + ":" + part === to));
+    const same = list.filter(([part, p]) => part === to || (p.profile === undefined && (p.vendor + ":" + part === to || Pick.label(p) === to)));
     const like = list.filter(([part]) => part.toLowerCase().includes(String(to).toLowerCase()));
     const one  = like.length === 1 ? like[0] : like.filter(mine).length === 1 ? like.find(mine) : undefined;
     const hit  = to === undefined ? list[next] : same.find(mine) ?? same[0] ?? one;
@@ -141,7 +147,7 @@ export namespace Pick {
   }
 
   export function label(pick: Pick): string {
-    return [pick.vendor, pick.model, pick.effort, pick.speed].join(":");
+    return [pick.vendor, pick.model, pick.effort, pick.speed, ...(pick.account === undefined ? [] : [pick.account])].join(":");
   }
 
   export function ask(pick: Pick): Pick {
@@ -155,29 +161,36 @@ export namespace Pick {
   }
 
   export function falls(run: Pick, falls: Fall[]): Pick[] {
-    const own = { vendor: run.vendor, model: run.model, effort: run.effort, speed: run.speed };
+    const own = { vendor: run.vendor, model: run.model, effort: run.effort, speed: run.speed, ...(run.account === undefined ? {} : { account: run.account }) };
     const list = falls.map((f) => {
       const on = Pick.on(own, f.vendor, f.model);
-      return Pick.ask({ ...on, effort: f.effort ?? on.effort, speed: f.speed ?? on.speed });
+      return Pick.ask({ ...on, account: f.account, effort: f.effort ?? on.effort, speed: f.speed ?? on.speed });
     });
     // a subscription never falls back to a metered API, nor the other way round
     const metered = (p: Pick) => p.vendor.endsWith("-api");
     const apart = (p: Pick) => (SubscriptionPicks.isVendor(own.vendor) && metered(p)) || (metered(own) && SubscriptionPicks.isVendor(p.vendor));
     const all = [own, ...list.filter((p) => !apart(p))];
-    return all.filter((p, k) => all.findIndex((q) => q.vendor === p.vendor && q.model === p.model) === k);
+    return all.filter((p, k) => all.findIndex((q) => q.vendor === p.vendor && q.model === p.model && q.account === p.account) === k);
   }
 
   export function profile(name: string, offer: Offer, effort: string, speed: string, require_available = true): Pick | null {
     const profiles = offer.profiles ?? {};
     const first = Object.hasOwn(profiles, name) ? profiles[name][0] : undefined;
-    if (first === undefined || (require_available && profiles[name].some((f) => !allowed(f.vendor, f.model, offer.available)))) {
+    if (first === undefined || (require_available && profiles[name].some((f) => !allowed(f.vendor, f.model, offer.available) || !Pick.account_available(f, offer)))) {
       return null;
     }
     const on = Pick.on({ vendor: first.vendor, model: first.model.label, effort, speed }, first.vendor, first.model);
-    return { ...on, effort: first.effort ?? on.effort, speed: first.speed ?? on.speed, profile: name };
+    return { ...on, effort: first.effort ?? on.effort, speed: first.speed ?? on.speed, account: first.account, profile: name };
   }
 
   export function read(x: unknown, offer: Offer, require_available = true): Pick | null {
+    const account = get(x, "account");
+    if (account !== undefined && (get(x, "vendor") !== "openai-sub" || typeof account !== "number" || !Number.isSafeInteger(account) || account < 1)) {
+      return null;
+    }
+    if (require_available && !Pick.account_available({ account }, offer)) {
+      return null;
+    }
     const [profile, effort, speed, label] = [get(x, "profile"), get(x, "effort"), get(x, "speed"), get(x, "model")];
     if (profile !== undefined) {
       return typeof profile === "string" && typeof effort === "string" && EFFORTS.includes(effort) ? Pick.profile(profile, offer, effort, String(speed), require_available) : null;
@@ -190,13 +203,17 @@ export namespace Pick {
     if (model === undefined || (require_available && !allowed(vendor, model, offer.available)) || typeof effort !== "string" || !efforts(model).includes(effort) || typeof speed !== "string" || !model.speeds.includes(speed)) {
       return null;
     }
-    return { vendor, model: label, effort, speed };
+    return { vendor, model: label, effort, speed, ...(account === undefined ? {} : { account }) };
   }
 
   export function window(pick: Pick, offer: Offer): number {
     const falls = pick.profile === undefined ? [] : offer.profiles?.[pick.profile] ?? [];
     const models = [Pick.model(pick.vendor, pick.model), ...falls.map((f) => f.model)];
     return Math.min(...models.map((m) => m?.window ?? 272e3));
+  }
+
+  export function account_available(pick: { account?: number }, offer: Offer): boolean {
+    return pick.account === undefined || (offer.accounts ?? []).some((a) => a.id === pick.account && a.connected);
   }
 
   export function load(saved: object | null, offer: Offer, def: Pick): Pick {

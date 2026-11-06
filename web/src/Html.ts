@@ -160,7 +160,7 @@ export function account_html(prompts: View.Prompts | null, notify: Notify | null
     + prompt_html("compact", prompts.compact.text, "The compaction prompt: all a summary of the memory gets, nothing else. compact.md in the server's folder; empty: the built-in one."));
   const mcp     = section_html("MCP servers", `<div class="mcp"></div>`, "mcp");
   const jump    = JUMPS.map(([id, name]) => `<button type="button" data-jump="${id}">${name}</button>`).join("");
-  return `<a class="back" href="/" data-go="/">← Chat</a><h1>Settings</h1><nav class="jump">${jump}</nav><div class="owned"></div>` + mine.replace("<section>", `<section id="s-prompts">`) + section_html("This browser", acts.join(""), "browser") + mcp;
+  return `<a class="back" href="/" data-go="/">← Chat</a><h1>Settings</h1><nav class="jump">${jump}</nav><section id="s-appearance"></section><div class="owned"></div>` + mine.replace("<section>", `<section id="s-prompts">`) + section_html("This browser", acts.join(""), "browser") + mcp;
 }
 
 function prompt_html(name: string, text: string, note: string): string {
@@ -201,7 +201,7 @@ export const VENDOR_KEY: Record<string, string> = { "claude-api": "anthropic", "
 
 export const PICKS = ["pick", "compactor", "agents"];
 
-const JUMPS: Array<[string, string]> = [["roles", "Roles"], ["providers", "Providers"], ["profiles", "Profiles"], ["server", "Server"], ["prompts", "Prompts"], ["browser", "Browser"], ["mcp", "MCP"]];
+const JUMPS: Array<[string, string]> = [["appearance", "Appearance"], ["roles", "Roles"], ["providers", "Providers"], ["profiles", "Profiles"], ["server", "Server"], ["prompts", "Prompts"], ["browser", "Browser"], ["mcp", "MCP"]];
 
 const KINDS: Record<string, string> = { sub: "subscription", api: "API key" };
 
@@ -464,7 +464,7 @@ function span_html(s: Md.Span): string {
       return kind === "image" ? `<a class="media" href="${k}" target="_blank"><img src="${k}" alt="${esc(s.x)}"${title} loading="lazy"></a>`
         : kind === "video" ? `<video class="media" src="${k}"${title} controls preload="metadata"></video>`
         : kind === "audio" ? `<audio class="media" src="${k}"${title} controls preload="metadata"></audio>`
-        : kind === "html" ? `<iframe class="media page" src="${k}" title="${esc(s.t || s.x)}" sandbox="allow-same-origin allow-popups" loading="lazy"></iframe>`
+        : kind === "html" ? `<iframe class="media page" src="${k}?unii-appearance=1" title="${esc(s.t || s.x)}" sandbox="allow-same-origin allow-popups" loading="lazy"></iframe>`
         : View.store_file(s.k) ? chip_html(s.k, s.x)
         : `<a href="${k}"${title} target="_blank" rel="noopener">${esc(s.x || s.k)}</a>`;
     }

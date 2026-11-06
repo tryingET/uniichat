@@ -23,6 +23,7 @@ What this fork adds:
 - **Skills** read from the ~/.agents/skills folder.
 - **Scheduling tools** to give your agent future or repeating tasks.
 - **Image and video viewing tools** to let it see images and video files.
+- **Appearance:** Settings chooses persistent light/dark palettes and automatic device day/night switching across chat, Settings and memory; terminal `/theme` offers the same catalog. Themes and semantic-palette design adapted from [Nodecode](https://github.com/nodecode-ai/nodecode); configured Ghostty Everforest variants by [sainnhe](https://github.com/sainnhe/everforest).
 - **Settings page** where you can customize the system prompt and compaction prompt.
 - **Improved memory tree viewer** to browse what your agent knows.
 - **Full markdown** as GitHub draws it, in the web app and the terminal.
